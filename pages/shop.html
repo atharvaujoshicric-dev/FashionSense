@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — What to Buy</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/shop.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">← </a>
+      <span class="topbar-title">What to Buy</span>
+    </div>
+  </header>
+
+  <div class="shop-intro">
+    <p class="shop-subtitle">Curated for you · June 2026 Trends</p>
+    <h2 id="shop-heading">Your Gap Analysis</h2>
+    <p id="shop-subtext" class="shop-subtext">Based on your wardrobe, here's what will complete your style.</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="category-tabs">
+    <button class="cat-tab active" data-cat="all" onclick="filterShop('all', this)">All</button>
+    <button class="cat-tab" data-cat="essential" onclick="filterShop('essential', this)">Essentials</button>
+    <button class="cat-tab" data-cat="trending" onclick="filterShop('trending', this)">Trending</button>
+    <button class="cat-tab" data-cat="upgrade" onclick="filterShop('upgrade', this)">Upgrades</button>
+  </div>
+
+  <!-- Shop cards -->
+  <div class="shop-grid" id="shop-grid">
+    <!-- Dynamically filled -->
+  </div>
+
+  <!-- Budget tip -->
+  <div class="budget-tip-box">
+    <h4>💡 Smart Shopping Tip</h4>
+    <p id="budget-tip-text"></p>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html" class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html" class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html" class="nav-item active">🛍️<span>Shop</span></a>
+    <a href="hair.html" class="nav-item">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/fashion-engine.js"></script>
+  <script src="../js/shop.js"></script>
+</body>
+</html>

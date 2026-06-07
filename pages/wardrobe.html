@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — My Wardrobe</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/wardrobe.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">← </a>
+      <span class="topbar-title">My Wardrobe</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="openUploadModal()">＋</button>
+    </div>
+  </header>
+
+  <!-- Category tabs -->
+  <div class="category-tabs" id="category-tabs">
+    <button class="cat-tab active" data-cat="all" onclick="filterCategory('all', this)">All</button>
+    <button class="cat-tab" data-cat="tops" onclick="filterCategory('tops', this)">Tops</button>
+    <button class="cat-tab" data-cat="bottoms" onclick="filterCategory('bottoms', this)">Bottoms</button>
+    <button class="cat-tab" data-cat="outerwear" onclick="filterCategory('outerwear', this)">Outerwear</button>
+    <button class="cat-tab" data-cat="footwear" onclick="filterCategory('footwear', this)">Footwear</button>
+    <button class="cat-tab" data-cat="accessories" onclick="filterCategory('accessories', this)">Accessories</button>
+    <button class="cat-tab" data-cat="ethnic" onclick="filterCategory('ethnic', this)">Ethnic</button>
+  </div>
+
+  <!-- Wardrobe grid -->
+  <div class="wardrobe-grid" id="wardrobe-grid">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">👔</div>
+      <p>Your wardrobe is empty</p>
+      <small>Tap ＋ to add your first item</small>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay hidden" id="upload-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Add to Wardrobe</h3>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select id="upload-category">
+          <option value="tops">Tops (Shirts, T-Shirts, Polos)</option>
+          <option value="bottoms">Bottoms (Pants, Jeans, Shorts)</option>
+          <option value="outerwear">Outerwear (Jackets, Blazers)</option>
+          <option value="footwear">Footwear</option>
+          <option value="accessories">Accessories</option>
+          <option value="ethnic">Ethnic / Traditional</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Sub-type</label>
+        <select id="upload-subtype">
+          <option value="shirt">Shirt</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Color</label>
+        <div class="color-picker-row" id="color-picker-row"></div>
+        <input type="text" id="upload-color-custom" placeholder="Or type a color (e.g. navy blue)" />
+      </div>
+
+      <div class="form-group">
+        <label>Photo</label>
+        <div class="photo-upload-area" id="photo-upload-area" onclick="document.getElementById('upload-file-input').click()">
+          <div class="photo-placeholder" id="photo-placeholder">
+            <span>📷</span>
+            <p>Tap to take photo or upload</p>
+          </div>
+          <img id="photo-preview" class="hidden" />
+          <input type="file" id="upload-file-input" accept="image/*" capture="environment" onchange="previewPhoto(this)" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Pattern</label>
+        <div class="pill-group" id="pattern-group">
+          <button class="pill active" data-val="solid" onclick="selectPill('pattern-group', this)">Solid</button>
+          <button class="pill" data-val="striped" onclick="selectPill('pattern-group', this)">Striped</button>
+          <button class="pill" data-val="checked" onclick="selectPill('pattern-group', this)">Checked</button>
+          <button class="pill" data-val="printed" onclick="selectPill('pattern-group', this)">Printed</button>
+          <button class="pill" data-val="floral" onclick="selectPill('pattern-group', this)">Floral</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Fit</label>
+        <div class="pill-group" id="fit-group">
+          <button class="pill active" data-val="regular" onclick="selectPill('fit-group', this)">Regular</button>
+          <button class="pill" data-val="slim" onclick="selectPill('fit-group', this)">Slim</button>
+          <button class="pill" data-val="oversized" onclick="selectPill('fit-group', this)">Oversized</button>
+          <button class="pill" data-val="loose" onclick="selectPill('fit-group', this)">Loose</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeUploadModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveClothingItem()">Add Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item detail Modal -->
+  <div class="modal-overlay hidden" id="item-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <img id="item-modal-img" class="item-detail-img" />
+      <h3 id="item-modal-title" class="modal-title"></h3>
+      <p id="item-modal-meta" class="item-modal-meta"></p>
+      <div class="modal-actions">
+        <button class="btn-danger" onclick="deleteCurrentItem()">🗑 Remove</button>
+        <button class="btn-ghost" onclick="closeItemModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html" class="nav-item active">👕<span>Wardrobe</span></a>
+    <a href="outfit.html" class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html" class="nav-item">🛍️<span>Shop</span></a>
+    <a href="hair.html" class="nav-item">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/wardrobe.js"></script>
+</body>
+</html>

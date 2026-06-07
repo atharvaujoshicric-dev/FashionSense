@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — Hair & Beard</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/hair.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">← </a>
+      <span class="topbar-title">Hair & Beard</span>
+    </div>
+  </header>
+
+  <div class="hair-intro">
+    <h2>Your Look, Perfected</h2>
+    <p>Recommendations based on your face shape & 2026 trends</p>
+  </div>
+
+  <!-- Face shape selector -->
+  <div class="section-block">
+    <div class="section-header"><h3>Your Face Shape</h3></div>
+    <div class="face-shape-grid" id="face-shape-grid">
+      <button class="face-card" data-shape="oval" onclick="selectFaceShape('oval', this)">
+        <div class="face-svg oval-face"></div>
+        <span>Oval</span>
+      </button>
+      <button class="face-card" data-shape="round" onclick="selectFaceShape('round', this)">
+        <div class="face-svg round-face"></div>
+        <span>Round</span>
+      </button>
+      <button class="face-card" data-shape="square" onclick="selectFaceShape('square', this)">
+        <div class="face-svg square-face"></div>
+        <span>Square</span>
+      </button>
+      <button class="face-card" data-shape="heart" onclick="selectFaceShape('heart', this)">
+        <div class="face-svg heart-face"></div>
+        <span>Heart</span>
+      </button>
+      <button class="face-card" data-shape="oblong" onclick="selectFaceShape('oblong', this)">
+        <div class="face-svg oblong-face"></div>
+        <span>Oblong</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hair recommendations -->
+  <div id="hair-results" class="hidden">
+    <div class="section-block">
+      <div class="section-header">
+        <h3>✂️ Hairstyle Recommendations</h3>
+        <span class="trending-pill">2026 Trends</span>
+      </div>
+      <div id="hair-cards" class="hair-cards"></div>
+    </div>
+
+    <!-- Beard section (shown only for male/nonbinary) -->
+    <div class="section-block" id="beard-section">
+      <div class="section-header">
+        <h3>🧔 Beard Recommendations</h3>
+      </div>
+      <div id="beard-cards" class="hair-cards"></div>
+    </div>
+
+    <!-- Grooming tips -->
+    <div class="grooming-tips-box">
+      <h4>✦ Grooming Tips</h4>
+      <ul id="grooming-tips-list"></ul>
+    </div>
+
+    <!-- Products -->
+    <div class="section-block">
+      <div class="section-header"><h3>Products to Try</h3></div>
+      <div id="product-cards" class="product-cards"></div>
+    </div>
+  </div>
+
+  <div id="hair-placeholder" class="empty-state">
+    <div class="empty-icon">✂️</div>
+    <p>Select your face shape above</p>
+    <small>to get personalized recommendations</small>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html" class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html" class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html" class="nav-item">🛍️<span>Shop</span></a>
+    <a href="hair.html" class="nav-item active">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/hair.js"></script>
+</body>
+</html>

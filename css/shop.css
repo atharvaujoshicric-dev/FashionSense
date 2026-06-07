@@ -1,0 +1,132 @@
+/* ==========================================
+   SHOP.CSS
+   ========================================== */
+
+.shop-intro {
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.shop-subtitle {
+  font-size: 0.78rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.25rem;
+}
+
+.shop-intro h2 {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+
+.shop-subtext {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+  line-height: 1.5;
+}
+
+/* Shop grid */
+.shop-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.shop-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  transition: border-color 0.2s;
+}
+
+.shop-card.essential { border-left: 3px solid var(--accent); }
+.shop-card.trending  { border-left: 3px solid var(--green); }
+.shop-card.upgrade   { border-left: 3px solid #6ea0c9; }
+
+.shop-card-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-card-info { flex: 1; }
+
+.shop-card-type {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.2rem;
+}
+
+.shop-card.essential .shop-card-type { color: var(--accent); }
+.shop-card.trending  .shop-card-type { color: var(--green); }
+.shop-card.upgrade   .shop-card-type { color: #6ea0c9; }
+
+.shop-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.shop-card-reason {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.shop-card-price {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+}
+
+.shop-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.shop-tag {
+  background: var(--bg-input);
+  color: var(--text-muted);
+  border-radius: 100px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.68rem;
+}
+
+/* Budget tip */
+.budget-tip-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 0 1rem 2rem;
+}
+
+.budget-tip-box h4 {
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.budget-tip-box p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
