@@ -374,3 +374,36 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* stats box in profile */
+.stats-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.stats-box h4 {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+  text-transform: capitalize;
+}
+.stat-row:last-child { border-bottom: none; }
+
+.body-photo-status {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-align: center;
+  margin-top: 0.5rem;
+}

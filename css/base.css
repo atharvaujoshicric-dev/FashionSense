@@ -619,3 +619,61 @@ select option {
 }
 
 .stat-row:last-child { border-bottom: none; }
+
+/* ==========================================
+   PHOTO PICKER SHEET
+   ========================================== */
+
+.picker-sheet { padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
+
+.picker-hint {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  min-height: 0;
+}
+
+.picker-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.picker-option:active { border-color: var(--accent); }
+
+.picker-option-icon { font-size: 1.6rem; flex-shrink: 0; }
+
+.picker-option-info { flex: 1; }
+
+.picker-option-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.picker-option-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+.picker-chevron {
+  font-size: 1.4rem;
+  color: var(--text-muted);
+}

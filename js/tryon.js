@@ -1,77 +1,73 @@
 /* ==========================================
-   TRYON.JS — Virtual Try-On via Canvas
-   Overlays outfit cards on user's photo
+   TRYON.JS — Virtual Try-On Renderer
    ========================================== */
 
-/**
- * Renders a virtual try-on composite image on a <canvas> element.
- * Uses CSS-based overlay approach since we don't have body segmentation.
- * Shows outfit pieces in a styled card grid beside/over the user photo.
- *
- * @param {string}   userPhotoDataUrl - user's full-body photo
- * @param {Array}    slots            - outfit slots [{role, item, label}]
- * @param {HTMLElement} container     - DOM element to render into
- */
 function renderTryOn(userPhotoDataUrl, slots, container) {
   container.innerHTML = '';
 
   const wrap = document.createElement('div');
   wrap.className = 'tryon-wrap';
 
-  // ── User photo side ───────────────────────────────────────────────────────
+  // ── Left: user photo with dot badges ──────────────────────────────────────
   const photoCol = document.createElement('div');
   photoCol.className = 'tryon-photo-col';
 
-  const photoLabel = document.createElement('div');
-  photoLabel.className = 'tryon-label';
-  photoLabel.textContent = 'Your Look';
+  const label = document.createElement('div');
+  label.className   = 'tryon-label';
+  label.textContent = 'Your Look';
 
-  const photoImg = document.createElement('img');
-  photoImg.src   = userPhotoDataUrl;
-  photoImg.className = 'tryon-user-photo';
-  photoImg.alt   = 'Your photo';
-
-  // Overlay badges for each outfit piece on the photo
   const overlayWrap = document.createElement('div');
   overlayWrap.className = 'tryon-overlay-wrap';
+
+  const photoImg = document.createElement('img');
+  photoImg.src       = userPhotoDataUrl;
+  photoImg.className = 'tryon-user-photo';
+  photoImg.alt       = 'Your photo';
   overlayWrap.appendChild(photoImg);
 
-  // Position labels over body zones
-  const ZONE_MAP = {
-    top:       { top: '28%', left: '50%', label: '👕' },
-    bottom:    { top: '58%', left: '50%', label: '👖' },
-    outerwear: { top: '22%', left: '10%', label: '🧥' },
-    footwear:  { top: '84%', left: '50%', label: '👟' },
-    accessory: { top: '14%', left: '82%', label: '⌚' }
+  // Position badges over approximate body zones
+  const ZONES = {
+    top:       { top: '28%', left: '50%' },
+    bottom:    { top: '58%', left: '50%' },
+    outerwear: { top: '22%', left: '14%' },
+    footwear:  { top: '85%', left: '50%' },
+    accessory: { top: '12%', left: '80%' }
+  };
+  const SLOT_EMOJI = {
+    top:'👕', bottom:'👖', outerwear:'🧥', footwear:'👟', accessory:'⌚'
   };
 
   slots.forEach(slot => {
-    const zone = ZONE_MAP[slot.role];
+    const zone = ZONES[slot.role];
     if (!zone) return;
 
     const badge = document.createElement('div');
-    badge.className = 'tryon-zone-badge';
+    badge.className  = 'tryon-zone-badge';
     badge.style.top  = zone.top;
     badge.style.left = zone.left;
-    badge.title = `${slot.item.color} ${slot.item.subtype}`;
+    badge.title      = `${slot.item.color} ${slot.item.subtype}`;
 
-    const thumb = slot.item.imageData
-      ? `<img src="${slot.item.imageData}" class="tryon-badge-img" />`
-      : `<span class="tryon-badge-emoji">${zone.label}</span>`;
-
-    badge.innerHTML = thumb;
+    if (slot.item.imageData) {
+      const img = document.createElement('img');
+      img.src       = slot.item.imageData;
+      img.className = 'tryon-badge-img';
+      badge.appendChild(img);
+    } else {
+      badge.textContent = SLOT_EMOJI[slot.role] || '👕';
+      badge.style.fontSize = '1rem';
+    }
     overlayWrap.appendChild(badge);
   });
 
-  photoCol.appendChild(photoLabel);
+  photoCol.appendChild(label);
   photoCol.appendChild(overlayWrap);
 
-  // ── Outfit cards side ─────────────────────────────────────────────────────
+  // ── Right: piece cards ─────────────────────────────────────────────────────
   const cardsCol = document.createElement('div');
   cardsCol.className = 'tryon-cards-col';
 
   const cardsLabel = document.createElement('div');
-  cardsLabel.className = 'tryon-label';
+  cardsLabel.className   = 'tryon-label';
   cardsLabel.textContent = 'Outfit Pieces';
   cardsCol.appendChild(cardsLabel);
 
@@ -79,17 +75,22 @@ function renderTryOn(userPhotoDataUrl, slots, container) {
     const card = document.createElement('div');
     card.className = 'tryon-piece-card';
 
-    const imgEl = slot.item.imageData
-      ? `<img src="${slot.item.imageData}" class="tryon-piece-img" />`
-      : `<div class="tryon-piece-placeholder">${getCategoryEmoji(slot.item.category)}</div>`;
+    const imgEl = document.createElement('div');
+    if (slot.item.imageData) {
+      imgEl.innerHTML = `<img src="${slot.item.imageData}" class="tryon-piece-img" />`;
+    } else {
+      imgEl.className    = 'tryon-piece-placeholder';
+      imgEl.textContent  = _catEmoji(slot.item.category);
+    }
 
-    card.innerHTML = `
-      ${imgEl}
-      <div class="tryon-piece-info">
-        <div class="tryon-piece-role">${slot.label}</div>
-        <div class="tryon-piece-name">${slot.item.color} ${slot.item.subtype}</div>
-      </div>
+    const info = document.createElement('div');
+    info.innerHTML = `
+      <div class="tryon-piece-role">${slot.label}</div>
+      <div class="tryon-piece-name">${slot.item.color} ${slot.item.subtype}</div>
     `;
+
+    card.appendChild(imgEl);
+    card.appendChild(info);
     cardsCol.appendChild(card);
   });
 
@@ -98,20 +99,21 @@ function renderTryOn(userPhotoDataUrl, slots, container) {
   container.appendChild(wrap);
 }
 
-/**
- * Renders a "no photo" prompt card
- */
-function renderTryOnNoPhoto(container, onUpload) {
+function renderTryOnNoPhoto(container, onUploadFnName) {
+  // onUploadFnName is a string like 'openBodyPhotoUpload' — safe to call
   container.innerHTML = `
     <div class="tryon-no-photo">
       <div class="tryon-no-photo-icon">🧍</div>
-      <p>Add your full-body photo to see how this outfit looks on you</p>
-      <button class="btn-primary" onclick="(${onUpload.toString()})()">Add My Photo</button>
+      <p>Add your full-body photo to visualise this outfit on you</p>
+      <button type="button" class="btn-primary"
+              onclick="${onUploadFnName}()"
+              style="margin-top:0.75rem;padding:0.65rem 1.5rem;font-size:0.88rem">
+        Add My Photo
+      </button>
     </div>
   `;
 }
 
-function getCategoryEmoji(cat) {
-  const m = { tops:'👕', bottoms:'👖', outerwear:'🧥', footwear:'👟', accessories:'⌚', ethnic:'🥻' };
-  return m[cat] || '👗';
+function _catEmoji(cat) {
+  return { tops:'👕', bottoms:'👖', outerwear:'🧥', footwear:'👟', accessories:'⌚', ethnic:'🥻' }[cat] || '👗';
 }

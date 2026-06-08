@@ -2,107 +2,112 @@
    PROFILE.JS
    ========================================== */
 
-let currentUser = null;
+let currentUser    = null;
 let pendingBodyPhoto = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
 
-  document.getElementById('profile-name-display').textContent = currentUser.name;
+  document.getElementById('profile-name-display').textContent     = currentUser.name;
   document.getElementById('profile-username-display').textContent = '@' + currentUser.username;
-  document.getElementById('p-name').value = currentUser.name;
-  document.getElementById('avatar-circle').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('p-name').value                         = currentUser.name;
+  document.getElementById('avatar-circle').textContent            = currentUser.name.charAt(0).toUpperCase();
 
   populateCitySelect('p-city', currentUser.city);
 
   // Pre-select pills
-  ['gender', 'bodytype', 'faceshape'].forEach(field => {
-    const keyMap = { gender: 'gender', bodytype: 'bodyType', faceshape: 'faceShape' };
-    const val = currentUser[keyMap[field]];
+  [
+    { group: 'p-gender-group',   key: 'gender'    },
+    { group: 'p-bodytype-group', key: 'bodyType'  },
+    { group: 'p-faceshape-group',key: 'faceShape' }
+  ].forEach(({ group, key }) => {
+    const val = currentUser[key];
     if (val) {
-      const pill = document.querySelector(`#p-${field}-group .pill[data-val="${val}"]`);
+      const pill = document.querySelector(`#${group} .pill[data-val="${val}"]`);
       if (pill) pill.classList.add('active');
     }
   });
 
   // Body photo
   if (currentUser.bodyPhoto) {
-    const img = document.getElementById('profile-body-photo-img');
-    img.src = currentUser.bodyPhoto;
-    img.classList.remove('hidden');
-    document.getElementById('profile-body-photo-placeholder').style.display = 'none';
+    _showBodyPhoto(currentUser.bodyPhoto);
     pendingBodyPhoto = currentUser.bodyPhoto;
   }
 
-  // Stats
   renderStats();
 });
 
 function openProfileBodyPhotoPicker() {
   openPhotoPicker((dataUrl) => {
+    if (!dataUrl) return;
     pendingBodyPhoto = dataUrl;
-    const img = document.getElementById('profile-body-photo-img');
-    img.src   = dataUrl;
-    img.classList.remove('hidden');
-    document.getElementById('profile-body-photo-placeholder').style.display = 'none';
-    showToast('Photo added — tap ✓ to save');
+    _showBodyPhoto(dataUrl);
+    document.getElementById('body-photo-status').classList.remove('hidden');
   }, {
     title: 'Full-Body Photo',
-    hint:  'Stand straight, full length from head to toe. Used for virtual try-on only — stored locally.'
+    hint:  'Stand straight, head to toe against a plain background. Used only for outfit try-on, stored on your device.'
   });
+}
+
+function _showBodyPhoto(dataUrl) {
+  const img = document.getElementById('profile-body-photo-img');
+  img.src   = dataUrl;
+  img.classList.remove('hidden');
+  document.getElementById('profile-body-photo-placeholder').style.display = 'none';
 }
 
 function saveProfile() {
   const name      = document.getElementById('p-name').value.trim();
   const city      = document.getElementById('p-city').value;
-  const gender    = getActivePillVal('p-gender-group');
-  const bodyType  = getActivePillVal('p-bodytype-group');
-  const faceShape = getActivePillVal('p-faceshape-group');
+  const gender    = _getActivePill('p-gender-group');
+  const bodyType  = _getActivePill('p-bodytype-group');
+  const faceShape = _getActivePill('p-faceshape-group');
 
   if (!name) { showToast('Name cannot be empty', 'error'); return; }
 
   const updates = { name, city };
-  if (gender)    updates.gender    = gender;
-  if (bodyType)  updates.bodyType  = bodyType;
-  if (faceShape) updates.faceShape = faceShape;
+  if (gender)          updates.gender    = gender;
+  if (bodyType)        updates.bodyType  = bodyType;
+  if (faceShape)       updates.faceShape = faceShape;
   if (pendingBodyPhoto) updates.bodyPhoto = pendingBodyPhoto;
 
   updateCurrentUser(updates);
-  showToast('Profile saved ✦');
+  currentUser = getCurrentUser(); // refresh local reference
 
+  showToast('Profile saved ✦');
   document.getElementById('profile-name-display').textContent = name;
-  document.getElementById('avatar-circle').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('avatar-circle').textContent        = name.charAt(0).toUpperCase();
+  document.getElementById('body-photo-status').classList.add('hidden');
 }
 
 function renderStats() {
-  const wardrobe = getWardrobeForUser(currentUser.username);
-  const cats = {};
-  wardrobe.forEach(i => { cats[i.category] = (cats[i.category] || 0) + 1; });
-
+  const wardrobe = _getWardrobe();
   const box = document.getElementById('stats-box');
   if (!box) return;
   if (wardrobe.length === 0) { box.style.display = 'none'; return; }
 
+  const cats = {};
+  wardrobe.forEach(i => { cats[i.category] = (cats[i.category] || 0) + 1; });
   const emojiMap = { tops:'👕', bottoms:'👖', outerwear:'🧥', footwear:'👟', accessories:'⌚', ethnic:'🥻' };
-  const rows = Object.entries(cats).map(([cat, count]) =>
-    `<div class="stat-row"><span>${emojiMap[cat] || '👗'} ${cat}</span><span>${count} item${count>1?'s':''}</span></div>`
-  ).join('');
 
+  box.style.display = 'block';
   box.innerHTML = `
-    <h4>Wardrobe (${wardrobe.length} items)</h4>
-    ${rows}
+    <h4>Wardrobe — ${wardrobe.length} item${wardrobe.length !== 1 ? 's' : ''}</h4>
+    ${Object.entries(cats).map(([cat, n]) =>
+      `<div class="stat-row">
+        <span>${emojiMap[cat] || '👗'} ${cat}</span>
+        <span>${n} item${n > 1 ? 's' : ''}</span>
+       </div>`
+    ).join('')}
   `;
 }
 
-function getWardrobeForUser(username) {
-  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + username)) || []; }
+function _getWardrobe() {
+  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + currentUser?.username)) || []; }
   catch { return []; }
 }
 
-function getActivePillVal(groupId) {
-  const el = document.getElementById(groupId);
-  if (!el) return null;
-  const a = el.querySelector('.pill.active');
-  return a ? a.dataset.val : null;
+function _getActivePill(groupId) {
+  return document.querySelector(`#${groupId} .pill.active`)?.dataset.val || null;
 }

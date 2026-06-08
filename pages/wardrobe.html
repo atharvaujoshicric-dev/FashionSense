@@ -21,14 +21,14 @@
     </div>
   </header>
 
-  <div class="category-tabs" id="category-tabs">
-    <button class="cat-tab active" data-cat="all"         onclick="filterCategory('all',this)">All</button>
-    <button class="cat-tab"        data-cat="tops"        onclick="filterCategory('tops',this)">Tops</button>
-    <button class="cat-tab"        data-cat="bottoms"     onclick="filterCategory('bottoms',this)">Bottoms</button>
-    <button class="cat-tab"        data-cat="outerwear"   onclick="filterCategory('outerwear',this)">Outerwear</button>
-    <button class="cat-tab"        data-cat="footwear"    onclick="filterCategory('footwear',this)">Footwear</button>
-    <button class="cat-tab"        data-cat="accessories" onclick="filterCategory('accessories',this)">Accessories</button>
-    <button class="cat-tab"        data-cat="ethnic"      onclick="filterCategory('ethnic',this)">Ethnic</button>
+  <div class="category-tabs">
+    <button class="cat-tab active" onclick="filterCategory('all',this)">All</button>
+    <button class="cat-tab" onclick="filterCategory('tops',this)">Tops</button>
+    <button class="cat-tab" onclick="filterCategory('bottoms',this)">Bottoms</button>
+    <button class="cat-tab" onclick="filterCategory('outerwear',this)">Outerwear</button>
+    <button class="cat-tab" onclick="filterCategory('footwear',this)">Footwear</button>
+    <button class="cat-tab" onclick="filterCategory('accessories',this)">Accessories</button>
+    <button class="cat-tab" onclick="filterCategory('ethnic',this)">Ethnic</button>
   </div>
 
   <div class="wardrobe-grid" id="wardrobe-grid">
@@ -39,32 +39,31 @@
     </div>
   </div>
 
-  <!-- ── UPLOAD MODAL ── -->
+  <!-- ── ADD ITEM MODAL ── -->
   <div class="modal-overlay hidden" id="upload-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <h3 class="modal-title">Add to Wardrobe</h3>
 
-      <!-- PHOTO FIRST — triggers auto-detect -->
+      <!-- Photo (tap → picker sheet) -->
       <div class="form-group">
-        <label>Photo <span class="label-hint">(AI auto-detects color & type)</span></label>
+        <label>Photo <span class="label-hint">· AI auto-detects color</span></label>
         <div class="photo-upload-area" id="photo-upload-area"
              onclick="openWardrobePhotoPicker()">
           <div class="photo-placeholder" id="photo-placeholder">
             <span>📷</span>
-            <p>Tap to add photo</p>
-            <small>Camera · Gallery · Files · Auto-detect color</small>
+            <p>Tap — Camera · Gallery · Files</p>
+            <small>Color is auto-detected from photo</small>
           </div>
-          <img id="photo-preview" class="hidden" alt="Preview" />
+          <img id="photo-preview" class="hidden" alt="Clothing preview" />
         </div>
-        <!-- Auto-detect result banner -->
         <div id="autodetect-banner" class="autodetect-banner hidden">
-          <div class="autodetect-spinner" id="autodetect-spinner">🔍 Analysing photo…</div>
-          <div id="autodetect-result" class="hidden">
+          <span id="autodetect-spinner">🔍 Detecting color…</span>
+          <span id="autodetect-result" class="hidden">
             <span id="autodetect-color-swatch" class="autodetect-swatch"></span>
             <span id="autodetect-text"></span>
-            <span class="autodetect-edit">· Edit below if needed</span>
-          </div>
+            <span class="autodetect-edit">· Change below if needed</span>
+          </span>
         </div>
       </div>
 
@@ -86,10 +85,13 @@
       </div>
 
       <div class="form-group">
-        <label>Color <span id="detected-color-badge" class="detected-badge hidden"></span></label>
+        <label>
+          Color
+          <span id="detected-color-badge" class="detected-badge hidden"></span>
+        </label>
         <div class="color-picker-row" id="color-picker-row"></div>
         <input type="text" id="upload-color-custom"
-               placeholder="Or type color (e.g. navy blue)" />
+               placeholder="Or type color name (e.g. navy blue)" />
       </div>
 
       <div class="form-group">
@@ -114,7 +116,7 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn-ghost" onclick="closeUploadModal()">Cancel</button>
+        <button type="button" class="btn-ghost"   onclick="closeUploadModal()">Cancel</button>
         <button type="button" class="btn-primary" onclick="saveClothingItem()">Add Item</button>
       </div>
     </div>
@@ -125,7 +127,7 @@
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <img id="item-modal-img" class="item-detail-img" alt="" />
-      <div id="item-modal-no-img" class="item-no-img-placeholder hidden"></div>
+      <div id="item-modal-no-img" class="hidden"></div>
       <h3 id="item-modal-title" class="modal-title"></h3>
       <p id="item-modal-meta" class="item-modal-meta"></p>
       <div class="modal-actions">
@@ -146,8 +148,8 @@
   <script src="../js/data.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
-  <script src="../js/image-analyze.js"></script>
   <script src="../js/photo-picker.js"></script>
+  <script src="../js/image-analyze.js"></script>
   <script src="../js/wardrobe.js"></script>
 </body>
 </html>

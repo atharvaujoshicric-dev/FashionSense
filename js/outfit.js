@@ -115,7 +115,7 @@ function refreshTryOnSection(slots) {
   const userPhoto = getUserBodyPhoto();
 
   if (!userPhoto) {
-    renderTryOnNoPhoto(body, openBodyPhotoUpload);
+    renderTryOnNoPhoto(body, 'openBodyPhotoUpload');
     return;
   }
 

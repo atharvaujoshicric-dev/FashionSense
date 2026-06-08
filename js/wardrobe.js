@@ -2,11 +2,12 @@
    WARDROBE.JS — Wardrobe Management
    ========================================== */
 
-let currentUser   = null;
-let wardrobeItems = [];
-let selectedColor = '';
-let currentFilter = 'all';
-let currentItemId = null;
+let currentUser     = null;
+let wardrobeItems   = [];
+let selectedColor   = '';
+let currentFilter   = 'all';
+let currentItemId   = null;
+let pendingImageB64 = null;   // ← fix: separate variable holds base64, not preview.src
 
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
@@ -14,18 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
   wardrobeItems = loadWardrobe();
   renderColorPicker();
   renderWardrobe();
-  onCategoryChange(); // init subtype dropdown
+  onCategoryChange();
 });
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 
 function loadWardrobe() {
-  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + currentUser.username)) || []; }
-  catch { return []; }
+  try {
+    const raw = localStorage.getItem('styleai_wardrobe_' + currentUser.username);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    console.warn('loadWardrobe error:', e);
+    return [];
+  }
 }
 
 function saveWardrobe() {
-  localStorage.setItem('styleai_wardrobe_' + currentUser.username, JSON.stringify(wardrobeItems));
+  try {
+    localStorage.setItem(
+      'styleai_wardrobe_' + currentUser.username,
+      JSON.stringify(wardrobeItems)
+    );
+  } catch (e) {
+    // localStorage quota exceeded (too many large photos)
+    showToast('Storage full — try removing some items or use smaller photos', 'error');
+    console.warn('saveWardrobe quota error:', e);
+  }
 }
 
 // ── Render grid ───────────────────────────────────────────────────────────────
@@ -82,19 +97,51 @@ function getCategoryEmoji(cat) {
 
 // ── Upload modal ──────────────────────────────────────────────────────────────
 
+function openUploadModal() {
+  pendingImageB64 = null;
+  document.getElementById('upload-modal').classList.remove('hidden');
+  document.getElementById('photo-preview').classList.add('hidden');
+  document.getElementById('photo-preview').src = '';
+  document.getElementById('photo-placeholder').style.display = 'flex';
+  document.getElementById('autodetect-banner').classList.add('hidden');
+  document.getElementById('detected-color-badge').classList.add('hidden');
+  selectedColor = '';
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  document.getElementById('upload-color-custom').value = '';
+  resetPillGroup('pattern-group', 'solid');
+  resetPillGroup('fit-group', 'regular');
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.add('hidden');
+  pendingImageB64 = null;
+}
+
+function resetPillGroup(groupId, defaultVal) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.val === defaultVal);
+  });
+}
+
+// ── Photo picker integration ──────────────────────────────────────────────────
+
 function openWardrobePhotoPicker() {
   openPhotoPicker((dataUrl) => {
-    // Show preview
+    if (!dataUrl) return;
+    pendingImageB64 = dataUrl;          // ← store separately
+
     const preview     = document.getElementById('photo-preview');
     const placeholder = document.getElementById('photo-placeholder');
     preview.src = dataUrl;
     preview.classList.remove('hidden');
     placeholder.style.display = 'none';
-    // Trigger auto-detect
+
     runAutoDetect(dataUrl);
   }, {
     title: 'Add Clothing Photo',
-    hint:  'Take or upload a photo of the clothing item. Color & type are auto-detected.'
+    hint:  'Take a photo or pick from gallery/files. Color is auto-detected.'
   });
 }
 
@@ -122,35 +169,12 @@ async function runAutoDetect(dataUrl) {
     const swatch = document.getElementById('autodetect-color-swatch');
     swatch.style.background = detected.detectedHex || '#888';
   } else {
-    document.getElementById('autodetect-text').textContent = 'Could not detect — please select color below';
+    document.getElementById('autodetect-text').textContent =
+      'Could not auto-detect — please choose color below';
   }
 }
 
-function openUploadModal() {
-  document.getElementById('upload-modal').classList.remove('hidden');
-  document.getElementById('photo-preview').classList.add('hidden');
-  document.getElementById('photo-placeholder').style.display = 'flex';
-  document.getElementById('upload-file-input').value = '';
-  document.getElementById('autodetect-banner').classList.add('hidden');
-  document.getElementById('detected-color-badge').classList.add('hidden');
-  selectedColor = '';
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-  document.getElementById('upload-color-custom').value = '';
-  // Reset pattern/fit
-  document.querySelector('#pattern-group .pill[data-val="solid"]').classList.add('active');
-  document.querySelectorAll('#pattern-group .pill:not([data-val="solid"])').forEach(p => p.classList.remove('active'));
-  document.querySelector('#fit-group .pill[data-val="regular"]').classList.add('active');
-  document.querySelectorAll('#fit-group .pill:not([data-val="regular"])').forEach(p => p.classList.remove('active'));
-}
-
-function closeUploadModal() {
-  document.getElementById('upload-modal').classList.add('hidden');
-}
-
-// handlePhotoUpload replaced by openWardrobePhotoPicker + runAutoDetect above
-
 function applyDetectedColor(colorName, hex) {
-  // Try to select matching named swatch
   const swatches = document.querySelectorAll('.color-swatch');
   let matched = false;
   swatches.forEach(sw => {
@@ -161,10 +185,9 @@ function applyDetectedColor(colorName, hex) {
       matched = true;
     }
   });
-  // If no exact match, put in custom field
   if (!matched) {
     document.getElementById('upload-color-custom').value = colorName;
-    selectedColor = '';
+    selectedColor = colorName; // still set it so save works
   }
 }
 
@@ -173,10 +196,10 @@ function renderColorPicker() {
   if (!row) return;
   COLORS.forEach(c => {
     const sw = document.createElement('div');
-    sw.className = 'color-swatch';
+    sw.className        = 'color-swatch';
     sw.style.backgroundColor = c.hex;
-    sw.dataset.name = c.name;
-    sw.title = c.name;
+    sw.dataset.name     = c.name;
+    sw.title            = c.name;
     sw.onclick = () => {
       document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
       sw.classList.add('selected');
@@ -188,12 +211,14 @@ function renderColorPicker() {
 }
 
 function onCategoryChange() {
-  const cat = document.getElementById('upload-category')?.value;
+  const cat    = document.getElementById('upload-category')?.value;
   const subSel = document.getElementById('upload-subtype');
   if (!cat || !subSel) return;
   const subtypes = SUBTYPES_BY_CATEGORY[cat] || [];
   subSel.innerHTML = subtypes.map(s => `<option value="${s}">${s}</option>`).join('');
 }
+
+// ── Save item ─────────────────────────────────────────────────────────────────
 
 function saveClothingItem() {
   const category    = document.getElementById('upload-category').value;
@@ -202,22 +227,36 @@ function saveClothingItem() {
   const color       = customColor || selectedColor;
   const pattern     = getActivePillVal('pattern-group') || 'solid';
   const fit         = getActivePillVal('fit-group')     || 'regular';
-  const preview     = document.getElementById('photo-preview');
-  const imageData   = preview && !preview.classList.contains('hidden') ? preview.src : null;
 
-  if (!color) { showToast('Please select or type a color', 'error'); return; }
+  if (!color) {
+    showToast('Please select or type a color before saving', 'error');
+    return;
+  }
 
-  wardrobeItems.push({
-    id: Date.now().toString(),
-    category, subtype, color, pattern, fit,
-    imageData,
-    addedAt: Date.now()
-  });
+  const item = {
+    id:        Date.now().toString(),
+    category,
+    subtype,
+    color,
+    pattern,
+    fit,
+    imageData: pendingImageB64 || null,   // ← use dedicated variable
+    addedAt:   Date.now()
+  };
 
+  wardrobeItems.push(item);
   saveWardrobe();
-  closeUploadModal();
-  renderWardrobe();
-  showToast(`${subtype} added ✦`);
+
+  // Verify save worked
+  const saved = loadWardrobe();
+  if (saved.find(i => i.id === item.id)) {
+    closeUploadModal();
+    renderWardrobe();
+    showToast(`${subtype} saved to wardrobe ✦`);
+  } else {
+    showToast('Save failed — storage may be full', 'error');
+    wardrobeItems.pop(); // rollback
+  }
 }
 
 // ── Item detail modal ─────────────────────────────────────────────────────────
@@ -231,7 +270,7 @@ function openItemModal(id) {
   const noImg = document.getElementById('item-modal-no-img');
 
   if (item.imageData) {
-    imgEl.src = item.imageData;
+    imgEl.src   = item.imageData;
     imgEl.style.display = 'block';
     noImg.classList.add('hidden');
   } else {
@@ -261,10 +300,10 @@ function deleteCurrentItem() {
   showToast('Item removed');
 }
 
-// Helper re-exposed for auth.js compatibility
+// ── Shared helper ─────────────────────────────────────────────────────────────
+
 function getActivePillVal(groupId) {
   const el = document.getElementById(groupId);
   if (!el) return null;
-  const a = el.querySelector('.pill.active');
-  return a ? a.dataset.val : null;
+  return el.querySelector('.pill.active')?.dataset.val || null;
 }

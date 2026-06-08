@@ -1,34 +1,28 @@
 # StyleAI — Your Personal Fashion Designer
 
-Mobile-first fashion advisor. No API keys. No backend. No subscriptions.  
-All data stored privately on your device.  
-**Trends accurate as of June 2026.**
+Mobile-first fashion advisor · June 2026 Trends · No API keys · No backend · All local
 
 ---
 
-## Quick Start
-
-### Demo Account
+## Demo Login
 - **Username:** `demo`  
-- **Password:** `demo123`  
+- **Password:** `demo123`
 
-Or tap **⚡ Demo Login** on the splash screen — no signup needed.
+Or create your own account from the splash screen.
 
 ---
 
-## Features
+## What's New (v2)
 
-| Feature | Details |
-|---|---|
-| 👤 User Accounts | Local login/register. Multi-user on same device. |
-| 👕 My Wardrobe | Add clothes with photo. **Color & type auto-detected from photo.** |
-| 📷 Universal Photo Picker | Every upload supports **Camera · Gallery · Files** |
-| ✨ Outfit Suggester | Color-theory + climate + body-type + 2026 trends |
-| 🪞 Virtual Try-On | Add your full-body photo → see outfit pieces overlaid on you |
-| 🔖 Save Looks | Save favourite outfit combinations |
-| 🛍️ What to Buy | Gap analysis + gender-specific 2026 trend picks |
-| 💈 Hair & Beard | Face-shape recommendations for 5 shapes × 3 genders |
-| 🌍 City-Aware | 50+ cities with climate-adjusted outfit suggestions |
+- ✅ **Demo login** — instant access, no signup needed
+- ✅ **Fixed: Create Account** button now works reliably
+- ✅ **Fixed: Photos now save** to wardrobe correctly
+- ✅ **Universal photo picker** — every photo upload offers Camera · Gallery · Files
+- ✅ **Auto image compression** — photos compressed before saving (prevents storage issues)
+- ✅ **Auto color detection** — upload a clothing photo, color is detected automatically
+- ✅ **Virtual try-on** — add your full-body photo, see outfit badges overlaid on your photo
+- ✅ **Shop reference images** — every shopping suggestion shows a real reference image
+- ✅ **Save outfits** — bookmark your favourite outfit combinations
 
 ---
 
@@ -38,28 +32,29 @@ Or tap **⚡ Demo Login** on the splash screen — no signup needed.
 styleai/
 ├── index.html              ← Splash / Login / Register
 ├── css/
-│   ├── base.css            ← Design tokens + photo picker + global
+│   ├── base.css            ← Tokens, global styles, photo picker
 │   ├── auth.css            ← Auth screens + demo button
 │   ├── app.css             ← Dashboard + shared
-│   ├── wardrobe.css        ← Wardrobe grid + auto-detect UI
-│   ├── outfit.css          ← Outfit page + saved looks
-│   ├── shop.css
-│   ├── hair.css
-│   └── tryon.css           ← Virtual try-on UI
-├── js/
-│   ├── data.js             ← 2026 trend data, cities, colors, hair DB
-│   ├── auth.js             ← Auth + demo account seeding
-│   ├── ui.js               ← Shared utilities, toast, pills
-│   ├── photo-picker.js     ← Universal camera/gallery/files picker
-│   ├── image-analyze.js    ← Canvas-based color detection (no API)
-│   ├── fashion-engine.js   ← Core outfit intelligence
-│   ├── tryon.js            ← Virtual try-on renderer
-│   ├── dashboard.js
-│   ├── wardrobe.js
-│   ├── outfit.js
-│   ├── shop.js
-│   ├── hair.js
-│   └── profile.js
+│   ├── wardrobe.css
+│   ├── outfit.css
+│   ├── shop.css            ← 2-column image grid
+│   ├── tryon.css           ← Virtual try-on UI
+│   └── hair.css
+└── js/
+    ├── data.js             ← All trend data, colors, cities
+    ├── auth.js             ← Auth + demo account seeding
+    ├── ui.js               ← Shared utilities
+    ├── photo-picker.js     ← Universal Camera/Gallery/Files picker
+    ├── image-analyze.js    ← Canvas-based color detection
+    ├── fashion-engine.js   ← Core outfit logic
+    ├── tryon.js            ← Try-on renderer
+    ├── shop-images.js      ← Unsplash reference images
+    ├── dashboard.js
+    ├── wardrobe.js
+    ├── outfit.js
+    ├── shop.js
+    ├── hair.js
+    └── profile.js
 └── pages/
     ├── dashboard.html
     ├── wardrobe.html
@@ -71,18 +66,14 @@ styleai/
 
 ---
 
-## Deploy on GitHub Pages
+## GitHub Pages Deploy
 
-1. Create a new GitHub repo (e.g. `styleai`)
-2. Upload **all files** maintaining the folder structure above
-3. Go to **Settings → Pages → Source → main branch / root**
-4. Live at: `https://yourusername.github.io/styleai/`
-
-> **Tip:** Use GitHub Desktop or drag-and-drop upload in the GitHub web UI for easiest upload.
+1. Create new GitHub repo, upload all files maintaining folder structure
+2. Settings → Pages → Source → main branch / root
+3. Live at `https://yourusername.github.io/reponame/`
 
 ---
 
 ## Privacy
 
-All data (accounts, wardrobe, photos, outfits) is stored in `localStorage` on your device only.  
-Nothing is transmitted to any server. Ever.
+Everything is stored in `localStorage` on your device only. Nothing is sent anywhere.

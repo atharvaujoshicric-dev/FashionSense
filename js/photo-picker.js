@@ -1,34 +1,31 @@
 /* ==========================================
    PHOTO-PICKER.JS — Universal Photo Picker
-   Works across: Camera, Gallery, File upload
-   Mobile-first bottom sheet UI
+   Camera · Gallery · Files — bottom sheet UI
    ========================================== */
 
 let _pickerCallback = null;
-let _pickerContext  = null;
 
 /**
- * Open the photo picker sheet.
- * @param {function} callback  - called with base64 dataUrl string
- * @param {object}   options   - { title, hint, capture }
+ * openPhotoPicker(callback, options)
+ * Shows a bottom sheet with Camera / Gallery / Files options.
+ * callback receives a base64 dataUrl string.
  */
 function openPhotoPicker(callback, options = {}) {
   _pickerCallback = callback;
-  _pickerContext  = options;
 
-  const sheet = document.getElementById('global-photo-picker');
-  if (!sheet) { _buildPickerSheet(); }
+  // Build sheet if not already in DOM
+  if (!document.getElementById('global-photo-picker')) {
+    _buildPickerSheet();
+  }
 
-  // Update title/hint
-  document.getElementById('picker-title').textContent  = options.title || 'Add Photo';
-  document.getElementById('picker-hint').textContent   = options.hint  || '';
-
+  document.getElementById('picker-title').textContent = options.title || 'Add Photo';
+  document.getElementById('picker-hint').textContent  = options.hint  || '';
   document.getElementById('global-photo-picker').classList.remove('hidden');
 }
 
 function closePhotoPicker() {
-  const sheet = document.getElementById('global-photo-picker');
-  if (sheet) sheet.classList.add('hidden');
+  const el = document.getElementById('global-photo-picker');
+  if (el) el.classList.add('hidden');
   _pickerCallback = null;
 }
 
@@ -44,25 +41,25 @@ function _buildPickerSheet() {
 
       <div class="picker-options">
 
-        <button class="picker-option" onclick="triggerPickerInput('camera')">
+        <button type="button" class="picker-option" onclick="_triggerPicker('camera')">
           <div class="picker-option-icon">📷</div>
           <div class="picker-option-info">
             <div class="picker-option-label">Take Photo</div>
-            <div class="picker-option-sub">Open camera</div>
+            <div class="picker-option-sub">Open camera now</div>
           </div>
           <span class="picker-chevron">›</span>
         </button>
 
-        <button class="picker-option" onclick="triggerPickerInput('gallery')">
+        <button type="button" class="picker-option" onclick="_triggerPicker('gallery')">
           <div class="picker-option-icon">🖼️</div>
           <div class="picker-option-info">
             <div class="picker-option-label">Choose from Gallery</div>
-            <div class="picker-option-sub">Photos & albums</div>
+            <div class="picker-option-sub">Photos &amp; albums</div>
           </div>
           <span class="picker-chevron">›</span>
         </button>
 
-        <button class="picker-option" onclick="triggerPickerInput('file')">
+        <button type="button" class="picker-option" onclick="_triggerPicker('file')">
           <div class="picker-option-icon">📁</div>
           <div class="picker-option-info">
             <div class="picker-option-label">Browse Files</div>
@@ -73,67 +70,75 @@ function _buildPickerSheet() {
 
       </div>
 
-      <!-- Hidden inputs for each source -->
-      <!-- Camera capture -->
-      <input type="file" id="picker-input-camera"
-             accept="image/*" capture="environment"
-             style="display:none"
-             onchange="handlePickerFile(this)" />
+      <!-- Three separate hidden inputs — each triggers a different OS dialog -->
+      <input type="file" id="_picker-camera"  accept="image/*" capture="environment"
+             style="display:none;position:absolute" onchange="_onPickerFile(this)" />
+      <input type="file" id="_picker-gallery" accept="image/*"
+             style="display:none;position:absolute" onchange="_onPickerFile(this)" />
+      <input type="file" id="_picker-file"    accept="image/*,.heic,.heif"
+             style="display:none;position:absolute" onchange="_onPickerFile(this)" />
 
-      <!-- Gallery (no capture attr = shows gallery on mobile) -->
-      <input type="file" id="picker-input-gallery"
-             accept="image/*"
-             style="display:none"
-             onchange="handlePickerFile(this)" />
-
-      <!-- File browser (broader accept) -->
-      <input type="file" id="picker-input-file"
-             accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif"
-             style="display:none"
-             onchange="handlePickerFile(this)" />
-
-      <button class="btn-ghost full" style="margin-top:0.75rem"
+      <button type="button" class="btn-ghost full" style="margin-top:0.75rem"
               onclick="closePhotoPicker()">Cancel</button>
     </div>
   `;
 
-  // Tap outside to close
-  overlay.addEventListener('click', (e) => {
+  overlay.addEventListener('click', e => {
     if (e.target === overlay) closePhotoPicker();
   });
 
   document.body.appendChild(overlay);
 }
 
-function triggerPickerInput(source) {
-  const inputId = {
-    camera:  'picker-input-camera',
-    gallery: 'picker-input-gallery',
-    file:    'picker-input-file'
-  }[source];
-
-  const input = document.getElementById(inputId);
+function _triggerPicker(source) {
+  const ids = { camera: '_picker-camera', gallery: '_picker-gallery', file: '_picker-file' };
+  const input = document.getElementById(ids[source]);
   if (!input) return;
-
-  // Reset so same file can be re-selected
-  input.value = '';
+  input.value = ''; // allow re-selecting same file
   input.click();
 }
 
-function handlePickerFile(input) {
-  const file = input.files[0];
+function _onPickerFile(input) {
+  const file = input.files && input.files[0];
   if (!file) { closePhotoPicker(); return; }
 
+  // Compress large images before storing to avoid quota issues
   const reader = new FileReader();
-  reader.onload = (e) => {
-    closePhotoPicker();
-    if (_pickerCallback) {
-      _pickerCallback(e.target.result);
-    }
+  reader.onload = e => {
+    _compressImage(e.target.result, 1200, 0.82, (compressed) => {
+      closePhotoPicker();
+      if (_pickerCallback) _pickerCallback(compressed);
+    });
   };
   reader.onerror = () => {
     closePhotoPicker();
     showToast('Could not read file. Try again.', 'error');
   };
   reader.readAsDataURL(file);
+}
+
+/**
+ * Compress image to max dimension & quality using canvas.
+ * This keeps localStorage usage manageable.
+ */
+function _compressImage(dataUrl, maxDim, quality, cb) {
+  const img = new Image();
+  img.onload = () => {
+    let { width, height } = img;
+    if (width > maxDim || height > maxDim) {
+      if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+      else                { width  = Math.round(width  * maxDim / height); height = maxDim; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width  = width;
+    canvas.height = height;
+    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+    try {
+      cb(canvas.toDataURL('image/jpeg', quality));
+    } catch (e) {
+      cb(dataUrl); // fallback: use original
+    }
+  };
+  img.onerror = () => cb(dataUrl);
+  img.src = dataUrl;
 }

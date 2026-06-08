@@ -27,30 +27,31 @@
     <p id="profile-username-display" class="profile-username"></p>
   </div>
 
-  <!-- Body photo -->
+  <!-- Full-body photo for try-on -->
   <div class="section-block">
     <div class="section-header">
       <h3>Full-Body Photo</h3>
       <span class="trending-pill">For Try-On</span>
     </div>
-    <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem">
-      Used for virtual outfit try-on. Stored only on your device.
+    <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.85rem;line-height:1.5">
+      Used to visualise outfit try-on. Stored only on your device, never uploaded.
     </p>
     <div class="body-photo-upload" id="profile-body-photo-area"
          onclick="openProfileBodyPhotoPicker()">
       <img id="profile-body-photo-img" class="hidden" alt="Your full body photo" />
       <div class="body-photo-placeholder" id="profile-body-photo-placeholder">
         <span>🧍</span>
-        <p>Tap to add full-body photo</p>
-        <small>Camera · Gallery · Files</small>
+        <p>Tap — Camera · Gallery · Files</p>
+        <small>Stand straight, head to toe</small>
       </div>
     </div>
+    <p id="body-photo-status" class="body-photo-status hidden">✦ Photo added — tap ✓ above to save</p>
   </div>
 
   <div class="profile-form">
     <div class="form-group">
       <label>Full Name</label>
-      <input type="text" id="p-name" />
+      <input type="text" id="p-name" autocomplete="name" />
     </div>
     <div class="form-group">
       <label>City</label>
@@ -85,12 +86,11 @@
       </div>
     </div>
 
-    <!-- Wardrobe stats -->
     <div class="stats-box" id="stats-box"></div>
 
     <div class="danger-zone">
       <h4>Account</h4>
-      <button type="button" class="btn-danger full" onclick="logout()">Sign Out</button>
+      <button type="button" class="btn-danger full"         onclick="logout()">Sign Out</button>
       <button type="button" class="btn-danger-outline full" onclick="deleteAccount()">Delete Account</button>
     </div>
   </div>
