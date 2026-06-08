@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — Dashboard</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="logo-icon small">✦</span>
+      <span class="topbar-title">StyleAI</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="window.location.href='profile.html'">👤</button>
+      <button class="icon-btn" onclick="logout()">↩</button>
+    </div>
+  </header>
+
+  <!-- Greeting -->
+  <section class="greeting-section">
+    <div class="greeting-text">
+      <p class="greeting-sub">Good <span id="time-greeting"></span>,</p>
+      <h2 id="user-greeting-name">Fashionista</h2>
+    </div>
+    <div class="trend-badge">June 2026 ✦</div>
+  </section>
+
+  <!-- Body photo prompt (shown only if not set) -->
+  <div id="body-photo-prompt" class="body-photo-prompt hidden">
+    <div class="bpp-left">
+      <span class="bpp-icon">🪞</span>
+      <div>
+        <p class="bpp-title">Add your photo</p>
+        <p class="bpp-sub">Enable virtual outfit try-on</p>
+      </div>
+    </div>
+    <a href="profile.html" class="bpp-btn">Add →</a>
+  </div>
+
+  <!-- Quick stats bar -->
+  <div class="quick-stats-bar" id="quick-stats-bar">
+    <div class="qs-item"><span class="qs-num" id="qs-items">0</span><span class="qs-label">Items</span></div>
+    <div class="qs-divider"></div>
+    <div class="qs-item"><span class="qs-num" id="qs-saved">0</span><span class="qs-label">Saved Looks</span></div>
+    <div class="qs-divider"></div>
+    <div class="qs-item"><span class="qs-num" id="qs-score">0</span><span class="qs-label">Style Score</span></div>
+  </div>
+
+  <!-- Quick actions -->
+  <section class="quick-actions">
+    <a href="wardrobe.html" class="action-card card-wardrobe">
+      <div class="action-icon">👕</div>
+      <div class="action-info">
+        <h3>My Wardrobe</h3>
+        <p>Upload & manage clothes</p>
+      </div>
+      <span class="action-count" id="wardrobe-count">0 items</span>
+    </a>
+    <a href="outfit.html" class="action-card card-outfit">
+      <div class="action-icon">✨</div>
+      <div class="action-info">
+        <h3>Get Outfit</h3>
+        <p>AI outfit combinations</p>
+      </div>
+      <span class="action-arrow">→</span>
+    </a>
+    <a href="shop.html" class="action-card card-shop">
+      <div class="action-icon">🛍️</div>
+      <div class="action-info">
+        <h3>What to Buy</h3>
+        <p>2026 trend picks for you</p>
+      </div>
+      <span class="action-arrow">→</span>
+    </a>
+    <a href="hair.html" class="action-card card-hair">
+      <div class="action-icon">💈</div>
+      <div class="action-info">
+        <h3>Hair & Beard</h3>
+        <p>Style for your face shape</p>
+      </div>
+      <span class="action-arrow">→</span>
+    </a>
+  </section>
+
+  <!-- Trending now -->
+  <section class="section-block">
+    <div class="section-header">
+      <h3>Trending Now · June 2026</h3>
+    </div>
+    <div class="trend-scroll" id="trend-cards"></div>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html"      class="nav-item">🛍️<span>Shop</span></a>
+    <a href="hair.html"      class="nav-item">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/photo-picker.js"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

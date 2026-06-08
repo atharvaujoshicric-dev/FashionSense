@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — What to Buy</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/shop.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">←</a>
+      <span class="topbar-title">What to Buy</span>
+    </div>
+  </header>
+
+  <div class="shop-intro">
+    <p class="shop-subtitle">Curated for you · June 2026 Trends</p>
+    <h2 id="shop-heading">Your 2026 Style Picks</h2>
+    <p id="shop-subtext" class="shop-subtext"></p>
+  </div>
+
+  <div class="category-tabs">
+    <button class="cat-tab active" onclick="filterShop('all',this)">All</button>
+    <button class="cat-tab" onclick="filterShop('essential',this)">Essentials</button>
+    <button class="cat-tab" onclick="filterShop('trending',this)">Trending</button>
+    <button class="cat-tab" onclick="filterShop('upgrade',this)">Upgrades</button>
+  </div>
+
+  <div class="shop-grid" id="shop-grid"></div>
+
+  <div class="budget-tip-box" id="budget-tip-box">
+    <h4>💡 Smart Shopping Tip</h4>
+    <p id="budget-tip-text"></p>
+  </div>
+
+  <!-- Item detail modal -->
+  <div class="modal-overlay hidden" id="shop-item-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <img id="shop-modal-img" class="shop-modal-img" alt="" />
+      <div class="shop-modal-type" id="shop-modal-type"></div>
+      <h3 id="shop-modal-name" class="modal-title"></h3>
+      <p id="shop-modal-reason" class="shop-modal-reason"></p>
+      <div id="shop-modal-tags" class="shop-card-tags" style="margin-bottom:1rem"></div>
+      <p id="shop-modal-price" class="shop-modal-price"></p>
+      <div class="modal-actions">
+        <button class="btn-ghost" onclick="closeShopModal()">Close</button>
+        <button class="btn-primary" onclick="searchOnline()">Search Online →</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html"      class="nav-item active">🛍️<span>Shop</span></a>
+    <a href="hair.html"      class="nav-item">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/shop-images.js"></script>
+  <script src="../js/photo-picker.js"></script>
+  <script src="../js/shop.js"></script>
+</body>
+</html>

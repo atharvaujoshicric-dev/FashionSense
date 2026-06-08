@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — My Wardrobe</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/wardrobe.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">←</a>
+      <span class="topbar-title">My Wardrobe</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="openUploadModal()">＋</button>
+    </div>
+  </header>
+
+  <div class="category-tabs">
+    <button class="cat-tab active" onclick="filterCategory('all',this)">All</button>
+    <button class="cat-tab" onclick="filterCategory('tops',this)">Tops</button>
+    <button class="cat-tab" onclick="filterCategory('bottoms',this)">Bottoms</button>
+    <button class="cat-tab" onclick="filterCategory('outerwear',this)">Outerwear</button>
+    <button class="cat-tab" onclick="filterCategory('footwear',this)">Footwear</button>
+    <button class="cat-tab" onclick="filterCategory('accessories',this)">Accessories</button>
+    <button class="cat-tab" onclick="filterCategory('ethnic',this)">Ethnic</button>
+  </div>
+
+  <div class="wardrobe-grid" id="wardrobe-grid">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">👔</div>
+      <p>Your wardrobe is empty</p>
+      <small>Tap ＋ to add your first item</small>
+    </div>
+  </div>
+
+  <!-- ── ADD ITEM MODAL ── -->
+  <div class="modal-overlay hidden" id="upload-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 class="modal-title">Add to Wardrobe</h3>
+
+      <!-- Photo (tap → picker sheet) -->
+      <div class="form-group">
+        <label>Photo <span class="label-hint">· AI auto-detects color</span></label>
+        <div class="photo-upload-area" id="photo-upload-area"
+             onclick="openWardrobePhotoPicker()">
+          <div class="photo-placeholder" id="photo-placeholder">
+            <span>📷</span>
+            <p>Tap — Camera · Gallery · Files</p>
+            <small>Color is auto-detected from photo</small>
+          </div>
+          <img id="photo-preview" class="hidden" alt="Clothing preview" />
+        </div>
+        <div id="autodetect-banner" class="autodetect-banner hidden">
+          <span id="autodetect-spinner">🔍 Detecting color…</span>
+          <span id="autodetect-result" class="hidden">
+            <span id="autodetect-color-swatch" class="autodetect-swatch"></span>
+            <span id="autodetect-text"></span>
+            <span class="autodetect-edit">· Change below if needed</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select id="upload-category" onchange="onCategoryChange()">
+          <option value="tops">Tops (Shirts, T-Shirts, Polos)</option>
+          <option value="bottoms">Bottoms (Pants, Jeans, Shorts)</option>
+          <option value="outerwear">Outerwear (Jackets, Blazers)</option>
+          <option value="footwear">Footwear</option>
+          <option value="accessories">Accessories</option>
+          <option value="ethnic">Ethnic / Traditional</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <select id="upload-subtype"></select>
+      </div>
+
+      <div class="form-group">
+        <label>
+          Color
+          <span id="detected-color-badge" class="detected-badge hidden"></span>
+        </label>
+        <div class="color-picker-row" id="color-picker-row"></div>
+        <input type="text" id="upload-color-custom"
+               placeholder="Or type color name (e.g. navy blue)" />
+      </div>
+
+      <div class="form-group">
+        <label>Pattern</label>
+        <div class="pill-group" id="pattern-group">
+          <button type="button" class="pill active" data-val="solid"   onclick="selectPill('pattern-group',this)">Solid</button>
+          <button type="button" class="pill"        data-val="striped" onclick="selectPill('pattern-group',this)">Striped</button>
+          <button type="button" class="pill"        data-val="checked" onclick="selectPill('pattern-group',this)">Checked</button>
+          <button type="button" class="pill"        data-val="printed" onclick="selectPill('pattern-group',this)">Printed</button>
+          <button type="button" class="pill"        data-val="floral"  onclick="selectPill('pattern-group',this)">Floral</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Fit</label>
+        <div class="pill-group" id="fit-group">
+          <button type="button" class="pill active" data-val="regular"   onclick="selectPill('fit-group',this)">Regular</button>
+          <button type="button" class="pill"        data-val="slim"      onclick="selectPill('fit-group',this)">Slim</button>
+          <button type="button" class="pill"        data-val="oversized" onclick="selectPill('fit-group',this)">Oversized</button>
+          <button type="button" class="pill"        data-val="loose"     onclick="selectPill('fit-group',this)">Loose</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost"   onclick="closeUploadModal()">Cancel</button>
+        <button type="button" class="btn-primary" onclick="saveClothingItem()">Add Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ITEM DETAIL MODAL ── -->
+  <div class="modal-overlay hidden" id="item-modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <img id="item-modal-img" class="item-detail-img" alt="" />
+      <div id="item-modal-no-img" class="hidden"></div>
+      <h3 id="item-modal-title" class="modal-title"></h3>
+      <p id="item-modal-meta" class="item-modal-meta"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" onclick="deleteCurrentItem()">🗑 Remove</button>
+        <button type="button" class="btn-ghost"  onclick="closeItemModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html"  class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"   class="nav-item active">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"     class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html"       class="nav-item">🛍️<span>Shop</span></a>
+    <a href="hair.html"       class="nav-item">💈<span>Hair</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/photo-picker.js"></script>
+  <script src="../js/image-analyze.js"></script>
+  <script src="../js/wardrobe.js"></script>
+</body>
+</html>
