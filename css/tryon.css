@@ -1,0 +1,208 @@
+/* ==========================================
+   TRYON.CSS — Virtual Try-On UI
+   ========================================== */
+
+.tryon-section {
+  margin: 0 1rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tryon-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tryon-section-header h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tryon-section-body {
+  padding: 1rem;
+}
+
+/* Wrap */
+.tryon-wrap {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+/* Photo column */
+.tryon-photo-col {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+
+.tryon-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.tryon-overlay-wrap {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+
+.tryon-user-photo {
+  width: 100%;
+  aspect-ratio: 3/5;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+  border-radius: var(--radius);
+}
+
+/* Zone badges overlaid on photo */
+.tryon-zone-badge {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: rgba(10,10,15,0.8);
+  backdrop-filter: blur(4px);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+  z-index: 10;
+}
+
+.tryon-zone-badge:hover { transform: translate(-50%,-50%) scale(1.2); }
+
+.tryon-badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tryon-badge-emoji { font-size: 1.1rem; }
+
+/* Cards column */
+.tryon-cards-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tryon-piece-card {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+}
+
+.tryon-piece-img {
+  width: 36px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.tryon-piece-placeholder {
+  width: 36px;
+  height: 44px;
+  background: var(--bg-card);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.tryon-piece-role {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.tryon-piece-name {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* No photo state */
+.tryon-no-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.tryon-no-photo-icon { font-size: 2.5rem; }
+.tryon-no-photo p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 220px;
+}
+
+/* Photo upload in profile */
+.body-photo-upload {
+  aspect-ratio: 2/3;
+  max-width: 180px;
+  margin: 0 auto;
+  background: var(--bg-input);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.body-photo-upload:active { border-color: var(--accent); }
+
+.body-photo-upload img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.body-photo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.body-photo-placeholder span { font-size: 3rem; }

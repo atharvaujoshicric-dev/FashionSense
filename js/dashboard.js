@@ -8,23 +8,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Greeting
   const hour = new Date().getHours();
-  const timeGreet = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
-  document.getElementById('time-greeting').textContent = timeGreet;
+  document.getElementById('time-greeting').textContent =
+    hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   document.getElementById('user-greeting-name').textContent = user.name.split(' ')[0];
 
-  // Wardrobe count
+  // Body photo prompt
+  if (!user.bodyPhoto) {
+    document.getElementById('body-photo-prompt').classList.remove('hidden');
+  }
+
+  // Wardrobe + stats
   const wardrobe = getWardrobe(user.username);
+  const saved    = getSavedOutfits(user.username);
+  const score    = calcStyleScore(wardrobe);
+
   const countEl = document.getElementById('wardrobe-count');
   if (countEl) countEl.textContent = `${wardrobe.length} item${wardrobe.length !== 1 ? 's' : ''}`;
 
-  // Trending cards
+  document.getElementById('qs-items').textContent = wardrobe.length;
+  document.getElementById('qs-saved').textContent = saved.length;
+  document.getElementById('qs-score').textContent = score;
+
   renderTrendCards();
 });
 
 function renderTrendCards() {
   const container = document.getElementById('trend-cards');
   if (!container) return;
-
   TRENDS_2026.forEach(t => {
     const card = document.createElement('div');
     card.className = 'trend-card';
@@ -39,7 +49,18 @@ function renderTrendCards() {
 }
 
 function getWardrobe(username) {
-  try {
-    return JSON.parse(localStorage.getItem('styleai_wardrobe_' + username)) || [];
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + username)) || []; }
+  catch { return []; }
+}
+
+function getSavedOutfits(username) {
+  try { return JSON.parse(localStorage.getItem('styleai_saved_outfits_' + username)) || []; }
+  catch { return []; }
+}
+
+function calcStyleScore(wardrobe) {
+  const cats   = new Set(wardrobe.map(i => i.category)).size;
+  const colors = new Set(wardrobe.map(i => i.color)).size;
+  const photos = wardrobe.filter(i => i.imageData).length;
+  return Math.min(100, (cats * 10) + (colors * 5) + Math.min(30, photos * 3) + (wardrobe.length * 2));
 }

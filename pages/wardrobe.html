@@ -13,7 +13,7 @@
 
   <header class="topbar">
     <div class="topbar-left">
-      <a href="dashboard.html" class="back-link">← </a>
+      <a href="dashboard.html" class="back-link">←</a>
       <span class="topbar-title">My Wardrobe</span>
     </div>
     <div class="topbar-right">
@@ -21,18 +21,16 @@
     </div>
   </header>
 
-  <!-- Category tabs -->
   <div class="category-tabs" id="category-tabs">
-    <button class="cat-tab active" data-cat="all" onclick="filterCategory('all', this)">All</button>
-    <button class="cat-tab" data-cat="tops" onclick="filterCategory('tops', this)">Tops</button>
-    <button class="cat-tab" data-cat="bottoms" onclick="filterCategory('bottoms', this)">Bottoms</button>
-    <button class="cat-tab" data-cat="outerwear" onclick="filterCategory('outerwear', this)">Outerwear</button>
-    <button class="cat-tab" data-cat="footwear" onclick="filterCategory('footwear', this)">Footwear</button>
-    <button class="cat-tab" data-cat="accessories" onclick="filterCategory('accessories', this)">Accessories</button>
-    <button class="cat-tab" data-cat="ethnic" onclick="filterCategory('ethnic', this)">Ethnic</button>
+    <button class="cat-tab active" data-cat="all"         onclick="filterCategory('all',this)">All</button>
+    <button class="cat-tab"        data-cat="tops"        onclick="filterCategory('tops',this)">Tops</button>
+    <button class="cat-tab"        data-cat="bottoms"     onclick="filterCategory('bottoms',this)">Bottoms</button>
+    <button class="cat-tab"        data-cat="outerwear"   onclick="filterCategory('outerwear',this)">Outerwear</button>
+    <button class="cat-tab"        data-cat="footwear"    onclick="filterCategory('footwear',this)">Footwear</button>
+    <button class="cat-tab"        data-cat="accessories" onclick="filterCategory('accessories',this)">Accessories</button>
+    <button class="cat-tab"        data-cat="ethnic"      onclick="filterCategory('ethnic',this)">Ethnic</button>
   </div>
 
-  <!-- Wardrobe grid -->
   <div class="wardrobe-grid" id="wardrobe-grid">
     <div class="empty-state" id="empty-state">
       <div class="empty-icon">👔</div>
@@ -41,15 +39,40 @@
     </div>
   </div>
 
-  <!-- Upload Modal -->
+  <!-- ── UPLOAD MODAL ── -->
   <div class="modal-overlay hidden" id="upload-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
       <h3 class="modal-title">Add to Wardrobe</h3>
 
+      <!-- PHOTO FIRST — triggers auto-detect -->
+      <div class="form-group">
+        <label>Photo <span class="label-hint">(AI auto-detects color & type)</span></label>
+        <div class="photo-upload-area" id="photo-upload-area"
+             onclick="document.getElementById('upload-file-input').click()">
+          <div class="photo-placeholder" id="photo-placeholder">
+            <span>📷</span>
+            <p>Tap to take photo or upload</p>
+            <small>Color & type auto-detected</small>
+          </div>
+          <img id="photo-preview" class="hidden" alt="Preview" />
+          <input type="file" id="upload-file-input" accept="image/*"
+                 capture="environment" onchange="handlePhotoUpload(this)" />
+        </div>
+        <!-- Auto-detect result banner -->
+        <div id="autodetect-banner" class="autodetect-banner hidden">
+          <div class="autodetect-spinner" id="autodetect-spinner">🔍 Analysing photo…</div>
+          <div id="autodetect-result" class="hidden">
+            <span id="autodetect-color-swatch" class="autodetect-swatch"></span>
+            <span id="autodetect-text"></span>
+            <span class="autodetect-edit">· Edit below if needed</span>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Category</label>
-        <select id="upload-category">
+        <select id="upload-category" onchange="onCategoryChange()">
           <option value="tops">Tops (Shirts, T-Shirts, Polos)</option>
           <option value="bottoms">Bottoms (Pants, Jeans, Shorts)</option>
           <option value="outerwear">Outerwear (Jackets, Blazers)</option>
@@ -60,83 +83,72 @@
       </div>
 
       <div class="form-group">
-        <label>Sub-type</label>
-        <select id="upload-subtype">
-          <option value="shirt">Shirt</option>
-        </select>
+        <label>Type</label>
+        <select id="upload-subtype"></select>
       </div>
 
       <div class="form-group">
-        <label>Color</label>
+        <label>Color <span id="detected-color-badge" class="detected-badge hidden"></span></label>
         <div class="color-picker-row" id="color-picker-row"></div>
-        <input type="text" id="upload-color-custom" placeholder="Or type a color (e.g. navy blue)" />
-      </div>
-
-      <div class="form-group">
-        <label>Photo</label>
-        <div class="photo-upload-area" id="photo-upload-area" onclick="document.getElementById('upload-file-input').click()">
-          <div class="photo-placeholder" id="photo-placeholder">
-            <span>📷</span>
-            <p>Tap to take photo or upload</p>
-          </div>
-          <img id="photo-preview" class="hidden" />
-          <input type="file" id="upload-file-input" accept="image/*" capture="environment" onchange="previewPhoto(this)" />
-        </div>
+        <input type="text" id="upload-color-custom"
+               placeholder="Or type color (e.g. navy blue)" />
       </div>
 
       <div class="form-group">
         <label>Pattern</label>
         <div class="pill-group" id="pattern-group">
-          <button class="pill active" data-val="solid" onclick="selectPill('pattern-group', this)">Solid</button>
-          <button class="pill" data-val="striped" onclick="selectPill('pattern-group', this)">Striped</button>
-          <button class="pill" data-val="checked" onclick="selectPill('pattern-group', this)">Checked</button>
-          <button class="pill" data-val="printed" onclick="selectPill('pattern-group', this)">Printed</button>
-          <button class="pill" data-val="floral" onclick="selectPill('pattern-group', this)">Floral</button>
+          <button type="button" class="pill active" data-val="solid"   onclick="selectPill('pattern-group',this)">Solid</button>
+          <button type="button" class="pill"        data-val="striped" onclick="selectPill('pattern-group',this)">Striped</button>
+          <button type="button" class="pill"        data-val="checked" onclick="selectPill('pattern-group',this)">Checked</button>
+          <button type="button" class="pill"        data-val="printed" onclick="selectPill('pattern-group',this)">Printed</button>
+          <button type="button" class="pill"        data-val="floral"  onclick="selectPill('pattern-group',this)">Floral</button>
         </div>
       </div>
 
       <div class="form-group">
         <label>Fit</label>
         <div class="pill-group" id="fit-group">
-          <button class="pill active" data-val="regular" onclick="selectPill('fit-group', this)">Regular</button>
-          <button class="pill" data-val="slim" onclick="selectPill('fit-group', this)">Slim</button>
-          <button class="pill" data-val="oversized" onclick="selectPill('fit-group', this)">Oversized</button>
-          <button class="pill" data-val="loose" onclick="selectPill('fit-group', this)">Loose</button>
+          <button type="button" class="pill active" data-val="regular"   onclick="selectPill('fit-group',this)">Regular</button>
+          <button type="button" class="pill"        data-val="slim"      onclick="selectPill('fit-group',this)">Slim</button>
+          <button type="button" class="pill"        data-val="oversized" onclick="selectPill('fit-group',this)">Oversized</button>
+          <button type="button" class="pill"        data-val="loose"     onclick="selectPill('fit-group',this)">Loose</button>
         </div>
       </div>
 
       <div class="modal-actions">
-        <button class="btn-ghost" onclick="closeUploadModal()">Cancel</button>
-        <button class="btn-primary" onclick="saveClothingItem()">Add Item</button>
+        <button type="button" class="btn-ghost" onclick="closeUploadModal()">Cancel</button>
+        <button type="button" class="btn-primary" onclick="saveClothingItem()">Add Item</button>
       </div>
     </div>
   </div>
 
-  <!-- Item detail Modal -->
+  <!-- ── ITEM DETAIL MODAL ── -->
   <div class="modal-overlay hidden" id="item-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
-      <img id="item-modal-img" class="item-detail-img" />
+      <img id="item-modal-img" class="item-detail-img" alt="" />
+      <div id="item-modal-no-img" class="item-no-img-placeholder hidden"></div>
       <h3 id="item-modal-title" class="modal-title"></h3>
       <p id="item-modal-meta" class="item-modal-meta"></p>
       <div class="modal-actions">
-        <button class="btn-danger" onclick="deleteCurrentItem()">🗑 Remove</button>
-        <button class="btn-ghost" onclick="closeItemModal()">Close</button>
+        <button type="button" class="btn-danger" onclick="deleteCurrentItem()">🗑 Remove</button>
+        <button type="button" class="btn-ghost"  onclick="closeItemModal()">Close</button>
       </div>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
-    <a href="wardrobe.html" class="nav-item active">👕<span>Wardrobe</span></a>
-    <a href="outfit.html" class="nav-item">✨<span>Outfit</span></a>
-    <a href="shop.html" class="nav-item">🛍️<span>Shop</span></a>
-    <a href="hair.html" class="nav-item">💈<span>Hair</span></a>
+    <a href="dashboard.html"  class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"   class="nav-item active">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"     class="nav-item">✨<span>Outfit</span></a>
+    <a href="shop.html"       class="nav-item">🛍️<span>Shop</span></a>
+    <a href="hair.html"       class="nav-item">💈<span>Hair</span></a>
   </nav>
 
   <script src="../js/data.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
+  <script src="../js/image-analyze.js"></script>
   <script src="../js/wardrobe.js"></script>
 </body>
 </html>

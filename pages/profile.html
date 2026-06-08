@@ -6,14 +6,15 @@
   <title>StyleAI — Profile</title>
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/tryon.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
 
   <header class="topbar">
     <div class="topbar-left">
-      <a href="dashboard.html" class="back-link">← </a>
-      <span class="topbar-title">Profile</span>
+      <a href="dashboard.html" class="back-link">←</a>
+      <span class="topbar-title">My Profile</span>
     </div>
     <div class="topbar-right">
       <button class="icon-btn" onclick="saveProfile()">✓</button>
@@ -24,6 +25,29 @@
     <div class="avatar-circle" id="avatar-circle"></div>
     <h2 id="profile-name-display"></h2>
     <p id="profile-username-display" class="profile-username"></p>
+  </div>
+
+  <!-- Body photo -->
+  <div class="section-block">
+    <div class="section-header">
+      <h3>Full-Body Photo</h3>
+      <span class="trending-pill">For Try-On</span>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem">
+      Used for virtual outfit try-on. Stored only on your device.
+    </p>
+    <div class="body-photo-upload" id="profile-body-photo-area"
+         onclick="document.getElementById('profile-body-photo-input').click()">
+      <img id="profile-body-photo-img" class="hidden" alt="Your full body photo" />
+      <div class="body-photo-placeholder" id="profile-body-photo-placeholder">
+        <span>🧍</span>
+        <p>Tap to upload full-body photo</p>
+        <small>Stand straight, full length</small>
+      </div>
+      <input type="file" id="profile-body-photo-input" accept="image/*"
+             capture="environment" onchange="handleProfileBodyPhoto(this)"
+             style="display:none" />
+    </div>
   </div>
 
   <div class="profile-form">
@@ -38,36 +62,39 @@
     <div class="form-group">
       <label>Gender</label>
       <div class="pill-group" id="p-gender-group">
-        <button class="pill" data-val="male" onclick="selectPill('p-gender-group', this)">Male</button>
-        <button class="pill" data-val="female" onclick="selectPill('p-gender-group', this)">Female</button>
-        <button class="pill" data-val="nonbinary" onclick="selectPill('p-gender-group', this)">Non-binary</button>
+        <button type="button" class="pill" data-val="male"      onclick="selectPill('p-gender-group',this)">Male</button>
+        <button type="button" class="pill" data-val="female"    onclick="selectPill('p-gender-group',this)">Female</button>
+        <button type="button" class="pill" data-val="nonbinary" onclick="selectPill('p-gender-group',this)">Non-binary</button>
       </div>
     </div>
     <div class="form-group">
       <label>Body Type</label>
       <div class="pill-group" id="p-bodytype-group">
-        <button class="pill" data-val="slim" onclick="selectPill('p-bodytype-group', this)">Slim</button>
-        <button class="pill" data-val="athletic" onclick="selectPill('p-bodytype-group', this)">Athletic</button>
-        <button class="pill" data-val="average" onclick="selectPill('p-bodytype-group', this)">Average</button>
-        <button class="pill" data-val="broad" onclick="selectPill('p-bodytype-group', this)">Broad</button>
-        <button class="pill" data-val="plus" onclick="selectPill('p-bodytype-group', this)">Plus</button>
+        <button type="button" class="pill" data-val="slim"     onclick="selectPill('p-bodytype-group',this)">Slim</button>
+        <button type="button" class="pill" data-val="athletic" onclick="selectPill('p-bodytype-group',this)">Athletic</button>
+        <button type="button" class="pill" data-val="average"  onclick="selectPill('p-bodytype-group',this)">Average</button>
+        <button type="button" class="pill" data-val="broad"    onclick="selectPill('p-bodytype-group',this)">Broad</button>
+        <button type="button" class="pill" data-val="plus"     onclick="selectPill('p-bodytype-group',this)">Plus</button>
       </div>
     </div>
     <div class="form-group">
       <label>Face Shape</label>
       <div class="pill-group" id="p-faceshape-group">
-        <button class="pill" data-val="oval" onclick="selectPill('p-faceshape-group', this)">Oval</button>
-        <button class="pill" data-val="round" onclick="selectPill('p-faceshape-group', this)">Round</button>
-        <button class="pill" data-val="square" onclick="selectPill('p-faceshape-group', this)">Square</button>
-        <button class="pill" data-val="heart" onclick="selectPill('p-faceshape-group', this)">Heart</button>
-        <button class="pill" data-val="oblong" onclick="selectPill('p-faceshape-group', this)">Oblong</button>
+        <button type="button" class="pill" data-val="oval"   onclick="selectPill('p-faceshape-group',this)">Oval</button>
+        <button type="button" class="pill" data-val="round"  onclick="selectPill('p-faceshape-group',this)">Round</button>
+        <button type="button" class="pill" data-val="square" onclick="selectPill('p-faceshape-group',this)">Square</button>
+        <button type="button" class="pill" data-val="heart"  onclick="selectPill('p-faceshape-group',this)">Heart</button>
+        <button type="button" class="pill" data-val="oblong" onclick="selectPill('p-faceshape-group',this)">Oblong</button>
       </div>
     </div>
 
+    <!-- Wardrobe stats -->
+    <div class="stats-box" id="stats-box"></div>
+
     <div class="danger-zone">
       <h4>Account</h4>
-      <button class="btn-danger full" onclick="logout()">Sign Out</button>
-      <button class="btn-danger-outline full" onclick="deleteAccount()">Delete Account</button>
+      <button type="button" class="btn-danger full" onclick="logout()">Sign Out</button>
+      <button type="button" class="btn-danger-outline full" onclick="deleteAccount()">Delete Account</button>
     </div>
   </div>
 
