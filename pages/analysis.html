@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — Style Analysis</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/features.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-link">←</a>
+      <span class="topbar-title">Style Insights</span>
+    </div>
+  </header>
+
+  <!-- Score card -->
+  <div class="score-card">
+    <div class="score-ring-wrap">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="55" cy="55" r="45" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle id="score-ring-fill" cx="55" cy="55" r="45" fill="none" stroke="var(--accent)"
+                stroke-width="8" stroke-linecap="round"
+                transform="rotate(-90 55 55)"
+                style="transition:stroke-dashoffset 1s ease"/>
+      </svg>
+      <div class="score-inner">
+        <div id="score-number" class="score-number">—</div>
+        <div class="score-unit">/100</div>
+      </div>
+    </div>
+    <div class="score-info">
+      <div id="score-label" class="score-label"></div>
+      <ul id="score-tips" class="score-tips"></ul>
+    </div>
+  </div>
+
+  <!-- Category breakdown -->
+  <div class="section-block">
+    <div class="section-header"><h3>📦 Category Coverage</h3></div>
+    <div id="category-breakdown"></div>
+  </div>
+
+  <!-- Color analysis -->
+  <div class="section-block">
+    <div class="section-header"><h3>🎨 Your Color Palette</h3></div>
+    <div id="color-wheel"></div>
+  </div>
+
+  <!-- Occasion coverage -->
+  <div class="section-block">
+    <div class="section-header"><h3>🎯 Occasion Coverage</h3></div>
+    <div id="occasion-coverage" class="occ-cover-grid"></div>
+  </div>
+
+  <!-- Color gaps -->
+  <div class="section-block">
+    <div class="section-header">
+      <h3>🔍 Color Gap Finder</h3>
+    </div>
+    <div id="color-gaps"></div>
+  </div>
+
+  <!-- What goes with this -->
+  <div class="section-block">
+    <div class="section-header"><h3>🤝 What Goes With This?</h3></div>
+    <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem">Pick an item to see what in your wardrobe pairs with it</p>
+    <select id="wgwt-select" style="margin-bottom:1rem"></select>
+    <div id="wgwt-results"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
+    <a href="analysis.html"  class="nav-item active">📊<span>Insights</span></a>
+    <a href="more.html"      class="nav-item">⋯<span>More</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/analysis.js"></script>
+</body>
+</html>

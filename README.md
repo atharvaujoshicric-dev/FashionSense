@@ -1,28 +1,21 @@
-# StyleAI — Your Personal Fashion Designer
+# StyleAI v3 — Your Personal Fashion Designer
 
-Mobile-first fashion advisor · June 2026 Trends · No API keys · No backend · All local
-
----
-
-## Demo Login
-- **Username:** `demo`  
-- **Password:** `demo123`
-
-Or create your own account from the splash screen.
+**Demo login:** username `demo` · password `demo123`
 
 ---
 
-## What's New (v2)
+## What's New in v3 (All 10 Features)
 
-- ✅ **Demo login** — instant access, no signup needed
-- ✅ **Fixed: Create Account** button now works reliably
-- ✅ **Fixed: Photos now save** to wardrobe correctly
-- ✅ **Universal photo picker** — every photo upload offers Camera · Gallery · Files
-- ✅ **Auto image compression** — photos compressed before saving (prevents storage issues)
-- ✅ **Auto color detection** — upload a clothing photo, color is detected automatically
-- ✅ **Virtual try-on** — add your full-body photo, see outfit badges overlaid on your photo
-- ✅ **Shop reference images** — every shopping suggestion shows a real reference image
-- ✅ **Save outfits** — bookmark your favourite outfit combinations
+1. **📅 Outfit Calendar** — Log daily outfits, plan future looks, track streaks, view history
+2. **📊 Style Score & Analysis** — 0-100 score, category coverage bars, occasion coverage, color palette chart
+3. **🌤️ Weather Integration** — Real-time weather via Open-Meteo (no key), outfit advice per temperature
+4. **↗ Share Card** — Generate a lookbook-style card image, save to camera roll or share via WhatsApp/Instagram
+5. **🤝 What Goes With This?** — Pick any item, see everything in your wardrobe that pairs with it
+6. **🧳 Packing List** — Enter destination + days + trip type → smart packing list from your wardrobe
+7. **🔍 Color Gap Finder** — Shows which colors would unlock the most new outfit combinations
+8. **🎯 First-Time Onboarding** — 4-step walkthrough for new users
+9. **☀️/🌙 Dark/Light Theme** — Toggle in More page or dashboard
+10. **🔍 Wardrobe Search & Sort** — Search by color/type/pattern, sort by newest/oldest/category/color
 
 ---
 
@@ -30,50 +23,57 @@ Or create your own account from the splash screen.
 
 ```
 styleai/
-├── index.html              ← Splash / Login / Register
+├── index.html
 ├── css/
-│   ├── base.css            ← Tokens, global styles, photo picker
-│   ├── auth.css            ← Auth screens + demo button
-│   ├── app.css             ← Dashboard + shared
+│   ├── base.css        ← tokens, global, light theme vars
+│   ├── auth.css
+│   ├── app.css
+│   ├── features.css    ← NEW: calendar, analysis, packing, weather, search
 │   ├── wardrobe.css
 │   ├── outfit.css
-│   ├── shop.css            ← 2-column image grid
-│   ├── tryon.css           ← Virtual try-on UI
+│   ├── shop.css
+│   ├── tryon.css
 │   └── hair.css
-└── js/
-    ├── data.js             ← All trend data, colors, cities
-    ├── auth.js             ← Auth + demo account seeding
-    ├── ui.js               ← Shared utilities
-    ├── photo-picker.js     ← Universal Camera/Gallery/Files picker
-    ├── image-analyze.js    ← Canvas-based color detection
-    ├── fashion-engine.js   ← Core outfit logic
-    ├── tryon.js            ← Try-on renderer
-    ├── shop-images.js      ← Unsplash reference images
-    ├── dashboard.js
-    ├── wardrobe.js
-    ├── outfit.js
-    ├── shop.js
-    ├── hair.js
-    └── profile.js
+├── js/
+│   ├── data.js             ← trend data, colors, cities
+│   ├── auth.js             ← login, register, demo account
+│   ├── ui.js               ← shared utilities
+│   ├── theme.js            ← NEW: dark/light toggle
+│   ├── weather.js          ← NEW: Open-Meteo weather
+│   ├── onboarding.js       ← NEW: first-time walkthrough
+│   ├── calendar.js         ← NEW: outfit calendar & history
+│   ├── analysis.js         ← NEW: style score & insights
+│   ├── packing.js          ← NEW: trip packing list
+│   ├── share-card.js       ← NEW: canvas share card
+│   ├── photo-picker.js     ← universal camera/gallery/files
+│   ├── image-analyze.js    ← auto color detection
+│   ├── fashion-engine.js   ← outfit generation logic
+│   ├── tryon.js            ← virtual try-on
+│   ├── shop-images.js      ← Unsplash reference images
+│   ├── dashboard.js
+│   ├── wardrobe.js         ← + search & sort
+│   ├── outfit.js           ← + share + weather
+│   ├── shop.js
+│   ├── hair.js
+│   └── profile.js
 └── pages/
-    ├── dashboard.html
-    ├── wardrobe.html
-    ├── outfit.html
+    ├── dashboard.html      ← + weather + new nav
+    ├── wardrobe.html       ← + search bar
+    ├── outfit.html         ← + weather bar + share
+    ├── analysis.html       ← NEW
+    ├── calendar.html       ← NEW
+    ├── packing.html        ← NEW
+    ├── more.html           ← NEW hub page
     ├── shop.html
     ├── hair.html
     └── profile.html
 ```
 
----
-
 ## GitHub Pages Deploy
-
-1. Create new GitHub repo, upload all files maintaining folder structure
-2. Settings → Pages → Source → main branch / root
-3. Live at `https://yourusername.github.io/reponame/`
-
----
+1. Upload all files keeping folder structure
+2. Settings → Pages → Source → main / root
+3. Open at `https://yourusername.github.io/reponame/`
 
 ## Privacy
-
-Everything is stored in `localStorage` on your device only. Nothing is sent anywhere.
+All data stored in `localStorage` on your device only.
+Weather uses Open-Meteo public API (no account needed, no data sent).

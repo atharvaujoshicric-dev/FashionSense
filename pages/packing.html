@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — Packing List</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/features.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="more.html" class="back-link">←</a>
+      <span class="topbar-title">Packing List</span>
+    </div>
+  </header>
+
+  <div class="pack-form-card">
+    <div class="form-group">
+      <label>Destination (optional)</label>
+      <input type="text" id="pack-dest" placeholder="e.g. Goa, Dubai, London" />
+    </div>
+    <div class="form-group">
+      <label>Travelling from</label>
+      <select id="pack-city"></select>
+    </div>
+    <div class="form-group">
+      <label>Duration</label>
+      <div class="pill-group" id="days-group">
+        <button type="button" class="pill active" data-val="2" onclick="selectPill('days-group',this);document.getElementById('pack-days').value=2">Weekend (2d)</button>
+        <button type="button" class="pill" data-val="3" onclick="selectPill('days-group',this);document.getElementById('pack-days').value=3">3 Days</button>
+        <button type="button" class="pill" data-val="5" onclick="selectPill('days-group',this);document.getElementById('pack-days').value=5">5 Days</button>
+        <button type="button" class="pill" data-val="7" onclick="selectPill('days-group',this);document.getElementById('pack-days').value=7">1 Week</button>
+        <button type="button" class="pill" data-val="14" onclick="selectPill('days-group',this);document.getElementById('pack-days').value=14">2 Weeks</button>
+      </div>
+      <input type="hidden" id="pack-days" value="2" />
+    </div>
+    <div class="form-group">
+      <label>Trip Type</label>
+      <div class="pill-group" id="pack-occ-group">
+        <button type="button" class="pill active" data-val="casual"  onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='casual'">Casual</button>
+        <button type="button" class="pill"        data-val="work"    onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='work'">Work</button>
+        <button type="button" class="pill"        data-val="party"   onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='party'">Party</button>
+        <button type="button" class="pill"        data-val="ethnic"  onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='ethnic'">Ethnic</button>
+        <button type="button" class="pill"        data-val="beach"   onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='beach'">Beach</button>
+        <button type="button" class="pill"        data-val="gym"     onclick="selectPill('pack-occ-group',this);document.getElementById('pack-occasion').value='gym'">Gym</button>
+      </div>
+      <input type="hidden" id="pack-occasion" value="casual" />
+    </div>
+    <button type="button" class="btn-primary full" onclick="generatePackingList()">Generate Packing List ✦</button>
+  </div>
+
+  <div id="packing-result" class="hidden" style="padding:0 1rem 6rem"></div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
+    <a href="analysis.html"  class="nav-item">📊<span>Insights</span></a>
+    <a href="more.html"      class="nav-item active">⋯<span>More</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/packing.js"></script>
+</body>
+</html>

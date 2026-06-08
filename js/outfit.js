@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   currentCity = currentUser.city || 'Mumbai';
   document.getElementById('outfit-city-label').textContent = currentCity;
   populateCitySelect('city-picker-select', currentCity);
+  loadOutfitWeather();
 
   // Load and show saved outfits
   renderSavedOutfits();
@@ -57,6 +58,9 @@ function renderOutfitResult(result) {
   document.getElementById('outfit-name').textContent = result.outfitName;
   document.getElementById('outfit-desc').textContent = result.outfitDesc;
   document.getElementById('save-outfit-btn').textContent = '🔖 Save Look';
+  // Show share btn
+  const shareBtn = document.getElementById('share-outfit-btn');
+  if (shareBtn) shareBtn.classList.remove('hidden');
 
   // Try-on
   refreshTryOnSection(result.slots);
@@ -342,4 +346,27 @@ function cap(str) {
 function getWardrobe(username) {
   try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + username)) || []; }
   catch { return []; }
+}
+
+// ── Share card ────────────────────────────────────────────────────────────────
+function shareCurrentOutfit() {
+  if (!currentOutfit || !currentUser) return;
+  showShareCard(currentOutfit, currentUser.username);
+}
+
+// ── Weather advisory in outfit ────────────────────────────────────────────────
+async function loadOutfitWeather() {
+  const el = document.getElementById('outfit-weather-bar');
+  if (!el) return;
+  try {
+    const w = await fetchWeather(currentCity);
+    const cat = getTempCategory(w.temp);
+    el.innerHTML = `
+      <div class="outfit-weather-inner">
+        <span class="outfit-weather-temp">${w.temp}${w.unit} ${w.description.split(' ').pop()}</span>
+        <span class="outfit-weather-advice">${w.advice[0]}</span>
+      </div>`;
+    el.className = 'outfit-weather-bar weather-' + cat;
+    el.classList.remove('hidden');
+  } catch {}
 }

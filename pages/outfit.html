@@ -35,6 +35,8 @@
     <button class="occ-btn"        data-occ="beach"   onclick="selectOccasion('beach',this)">Beach</button>
   </div>
 
+  <div id="outfit-weather-bar" class="outfit-weather-bar hidden"></div>
+
   <!-- Generate -->
   <div class="generate-wrap">
     <button class="btn-generate" onclick="generateOutfit()">
@@ -60,6 +62,7 @@
       <div class="outfit-action-row">
         <button class="btn-save-outfit" id="save-outfit-btn" onclick="saveCurrentOutfit()">🔖 Save Look</button>
         <button class="btn-share-outfit" onclick="generateOutfit()">↻ New Combo</button>
+        <button class="btn-share-outfit hidden" id="share-outfit-btn" onclick="shareCurrentOutfit()">↗ Share</button>
       </div>
     </div>
 
@@ -159,11 +162,15 @@
     <a href="hair.html"      class="nav-item">💈<span>Hair</span></a>
   </nav>
 
+  <script src="../js/theme.js"></script>
   <script src="../js/data.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/fashion-engine.js"></script>
   <script src="../js/photo-picker.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/weather.js"></script>
+  <script src="../js/share-card.js"></script>
   <script src="../js/tryon.js"></script>
   <script src="../js/outfit.js"></script>
 </body>

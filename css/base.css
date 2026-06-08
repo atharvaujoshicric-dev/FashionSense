@@ -677,3 +677,41 @@ select option {
   font-size: 1.4rem;
   color: var(--text-muted);
 }
+
+/* ==========================================
+   LIGHT THEME VARIABLES
+   ========================================== */
+
+[data-theme="light"] {
+  --bg:           #f5f3ef;
+  --bg-card:      #ffffff;
+  --bg-elevated:  #ede9e3;
+  --bg-input:     #e8e4de;
+  --border:       #d4cfc8;
+  --border-light: #c8c2bb;
+
+  --text-primary:   #1a1814;
+  --text-secondary: #5a5650;
+  --text-muted:     #9a9590;
+
+  --accent:       #9a6f30;
+  --accent-light: #b8892e;
+  --accent-dim:   rgba(154,111,48,0.12);
+  --accent-glow:  rgba(154,111,48,0.06);
+
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
+  --shadow:     0 8px 32px rgba(0,0,0,0.12);
+  --shadow-glow:0 0 24px rgba(154,111,48,0.15);
+}
+
+[data-theme="light"] .topbar {
+  background: rgba(245,243,239,0.95);
+}
+[data-theme="light"] .bottom-nav {
+  background: rgba(240,237,232,0.97);
+}
+[data-theme="light"] .splash-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(154,111,48,0.10) 0%, transparent 60%),
+    linear-gradient(180deg, #f5f3ef 0%, #ede9e3 100%);
+}

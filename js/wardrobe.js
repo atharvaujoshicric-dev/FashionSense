@@ -327,3 +327,54 @@ function _resetPills(groupId, defaultVal) {
 
 // Exposed for use in other modules (fashion-engine, outfit.js etc.)
 function getWardrobeItems() { return _wItems; }
+
+// ── Search & filter ───────────────────────────────────────────────────────────
+
+function searchWardrobe(query) {
+  const q = (query || '').toLowerCase().trim();
+  if (!q) { _render(); return; }
+
+  const grid  = document.getElementById('wardrobe-grid');
+  const empty = document.getElementById('empty-state');
+  const list  = _wItems.filter(i =>
+    i.color.toLowerCase().includes(q) ||
+    i.subtype.toLowerCase().includes(q) ||
+    i.category.toLowerCase().includes(q) ||
+    (i.pattern || '').toLowerCase().includes(q)
+  );
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No items match "${q}"</p></div>`;
+    return;
+  }
+
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = '';
+
+  list.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'wardrobe-item';
+    el.onclick   = () => _openDetail(item.id);
+
+    if (item.imageData) {
+      el.innerHTML = `<img src="${item.imageData}" alt="${item.subtype}" loading="lazy" /><div class="wardrobe-item-badge">${item.subtype}</div>`;
+    } else {
+      const dot = _hexFor(item.color);
+      el.innerHTML = `
+        <div class="wardrobe-item-placeholder">
+          <span>${_catEmoji(item.category)}</span>
+          ${dot ? `<span class="wi-color-dot" style="background:${dot}"></span>` : ''}
+          <span class="wi-label">${item.color}<br/>${item.subtype}</span>
+        </div>`;
+    }
+    grid.appendChild(el);
+  });
+}
+
+function sortWardrobe(by) {
+  if (by === 'newest')   _wItems.sort((a,b) => b.addedAt - a.addedAt);
+  if (by === 'oldest')   _wItems.sort((a,b) => a.addedAt - b.addedAt);
+  if (by === 'category') _wItems.sort((a,b) => a.category.localeCompare(b.category));
+  if (by === 'color')    _wItems.sort((a,b) => a.color.localeCompare(b.color));
+  _render();
+}
