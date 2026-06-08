@@ -64,3 +64,24 @@ function calcStyleScore(wardrobe) {
   const photos = wardrobe.filter(i => i.imageData).length;
   return Math.min(100, (cats * 10) + (colors * 5) + Math.min(30, photos * 3) + (wardrobe.length * 2));
 }
+
+function checkBodyPhotoNudge(user) {
+  const nudge = document.getElementById('body-photo-nudge');
+  if (!nudge) return;
+  if (!user.bodyPhoto) {
+    nudge.classList.remove('hidden');
+  }
+}
+
+function openDashboardBodyPhotoPicker() {
+  openPhotoPicker((dataUrl) => {
+    const user = getCurrentUser();
+    if (!user) return;
+    updateCurrentUser({ bodyPhoto: dataUrl });
+    document.getElementById('body-photo-nudge').classList.add('hidden');
+    showToast('Photo saved! Go to Outfit to try on looks ✦');
+  }, {
+    title: 'Full-Body Photo',
+    hint: 'Adds virtual try-on to your outfit suggestions. Stored privately on your device.'
+  });
+}

@@ -49,15 +49,13 @@
       <div class="form-group">
         <label>Photo <span class="label-hint">(AI auto-detects color & type)</span></label>
         <div class="photo-upload-area" id="photo-upload-area"
-             onclick="document.getElementById('upload-file-input').click()">
+             onclick="openWardrobePhotoPicker()">
           <div class="photo-placeholder" id="photo-placeholder">
             <span>📷</span>
-            <p>Tap to take photo or upload</p>
-            <small>Color & type auto-detected</small>
+            <p>Tap to add photo</p>
+            <small>Camera · Gallery · Files · Auto-detect color</small>
           </div>
           <img id="photo-preview" class="hidden" alt="Preview" />
-          <input type="file" id="upload-file-input" accept="image/*"
-                 capture="environment" onchange="handlePhotoUpload(this)" />
         </div>
         <!-- Auto-detect result banner -->
         <div id="autodetect-banner" class="autodetect-banner hidden">
@@ -149,6 +147,7 @@
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/image-analyze.js"></script>
+  <script src="../js/photo-picker.js"></script>
   <script src="../js/wardrobe.js"></script>
 </body>
 </html>

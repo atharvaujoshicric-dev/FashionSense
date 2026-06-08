@@ -82,6 +82,50 @@ function getCategoryEmoji(cat) {
 
 // ── Upload modal ──────────────────────────────────────────────────────────────
 
+function openWardrobePhotoPicker() {
+  openPhotoPicker((dataUrl) => {
+    // Show preview
+    const preview     = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    placeholder.style.display = 'none';
+    // Trigger auto-detect
+    runAutoDetect(dataUrl);
+  }, {
+    title: 'Add Clothing Photo',
+    hint:  'Take or upload a photo of the clothing item. Color & type are auto-detected.'
+  });
+}
+
+async function runAutoDetect(dataUrl) {
+  const banner  = document.getElementById('autodetect-banner');
+  const spinner = document.getElementById('autodetect-spinner');
+  const result  = document.getElementById('autodetect-result');
+
+  banner.classList.remove('hidden');
+  spinner.style.display = 'block';
+  result.classList.add('hidden');
+
+  const category = document.getElementById('upload-category').value;
+  const detected = await analyzeClothingImage(dataUrl, category);
+
+  spinner.style.display = 'none';
+  result.classList.remove('hidden');
+
+  if (detected.color && detected.color !== 'unknown') {
+    applyDetectedColor(detected.color, detected.detectedHex);
+    const badge = document.getElementById('detected-color-badge');
+    badge.textContent = `✦ Auto-detected: ${detected.color}`;
+    badge.classList.remove('hidden');
+    document.getElementById('autodetect-text').textContent = `Detected: ${detected.color}`;
+    const swatch = document.getElementById('autodetect-color-swatch');
+    swatch.style.background = detected.detectedHex || '#888';
+  } else {
+    document.getElementById('autodetect-text').textContent = 'Could not detect — please select color below';
+  }
+}
+
 function openUploadModal() {
   document.getElementById('upload-modal').classList.remove('hidden');
   document.getElementById('photo-preview').classList.add('hidden');
@@ -103,55 +147,7 @@ function closeUploadModal() {
   document.getElementById('upload-modal').classList.add('hidden');
 }
 
-async function handlePhotoUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const dataUrl = e.target.result;
-
-    // Show preview
-    const preview = document.getElementById('photo-preview');
-    const placeholder = document.getElementById('photo-placeholder');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    placeholder.style.display = 'none';
-
-    // Start auto-detect
-    const banner  = document.getElementById('autodetect-banner');
-    const spinner = document.getElementById('autodetect-spinner');
-    const result  = document.getElementById('autodetect-result');
-
-    banner.classList.remove('hidden');
-    spinner.style.display = 'block';
-    result.classList.add('hidden');
-
-    const category = document.getElementById('upload-category').value;
-    const detected = await analyzeClothingImage(dataUrl, category);
-
-    spinner.style.display = 'none';
-    result.classList.remove('hidden');
-
-    if (detected.color && detected.color !== 'unknown') {
-      // Apply detected color
-      applyDetectedColor(detected.color, detected.detectedHex);
-
-      const badge = document.getElementById('detected-color-badge');
-      badge.textContent = `✦ Auto-detected: ${detected.color}`;
-      badge.classList.remove('hidden');
-
-      document.getElementById('autodetect-text').textContent =
-        `Detected: ${detected.color}`;
-      const swatch = document.getElementById('autodetect-color-swatch');
-      swatch.style.background = detected.detectedHex || '#888';
-    } else {
-      document.getElementById('autodetect-text').textContent =
-        'Could not detect — please select color below';
-    }
-  };
-  reader.readAsDataURL(file);
-}
+// handlePhotoUpload replaced by openWardrobePhotoPicker + runAutoDetect above
 
 function applyDetectedColor(colorName, hex) {
   // Try to select matching named swatch

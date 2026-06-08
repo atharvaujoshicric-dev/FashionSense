@@ -1,15 +1,34 @@
 # StyleAI — Your Personal Fashion Designer
 
-A fully client-side fashion advisor app. No API keys. No backend. All local.  
+Mobile-first fashion advisor. No API keys. No backend. No subscriptions.  
+All data stored privately on your device.  
 **Trends accurate as of June 2026.**
 
 ---
 
-## Demo Login
-- **Username:** `demo`  
-- **Password:** `demo123`
+## Quick Start
 
-Or click **⚡ Demo Login** on the splash screen.
+### Demo Account
+- **Username:** `demo`  
+- **Password:** `demo123`  
+
+Or tap **⚡ Demo Login** on the splash screen — no signup needed.
+
+---
+
+## Features
+
+| Feature | Details |
+|---|---|
+| 👤 User Accounts | Local login/register. Multi-user on same device. |
+| 👕 My Wardrobe | Add clothes with photo. **Color & type auto-detected from photo.** |
+| 📷 Universal Photo Picker | Every upload supports **Camera · Gallery · Files** |
+| ✨ Outfit Suggester | Color-theory + climate + body-type + 2026 trends |
+| 🪞 Virtual Try-On | Add your full-body photo → see outfit pieces overlaid on you |
+| 🔖 Save Looks | Save favourite outfit combinations |
+| 🛍️ What to Buy | Gap analysis + gender-specific 2026 trend picks |
+| 💈 Hair & Beard | Face-shape recommendations for 5 shapes × 3 genders |
+| 🌍 City-Aware | 50+ cities with climate-adjusted outfit suggestions |
 
 ---
 
@@ -19,27 +38,28 @@ Or click **⚡ Demo Login** on the splash screen.
 styleai/
 ├── index.html              ← Splash / Login / Register
 ├── css/
-│   ├── base.css            ← Design tokens, global styles
-│   ├── auth.css            ← Splash + auth screens + demo button
-│   ├── app.css             ← Dashboard + shared app UI + stats
-│   ├── wardrobe.css        ← Wardrobe grid + auto-detect banner
-│   ├── outfit.css          ← Outfit result + saved looks
-│   ├── shop.css            ← Shop suggestion cards
-│   ├── hair.css            ← Hair & beard cards
-│   └── tryon.css           ← Virtual try-on overlay UI
+│   ├── base.css            ← Design tokens + photo picker + global
+│   ├── auth.css            ← Auth screens + demo button
+│   ├── app.css             ← Dashboard + shared
+│   ├── wardrobe.css        ← Wardrobe grid + auto-detect UI
+│   ├── outfit.css          ← Outfit page + saved looks
+│   ├── shop.css
+│   ├── hair.css
+│   └── tryon.css           ← Virtual try-on UI
 ├── js/
-│   ├── data.js             ← All 2026 trend data, cities, colors, hair DB
-│   ├── auth.js             ← Login / register / demo account / sessions
-│   ├── ui.js               ← Shared UI utilities
-│   ├── image-analyze.js    ← Canvas-based color detection from photos
-│   ├── fashion-engine.js   ← Outfit scoring engine (color theory, climate, body)
+│   ├── data.js             ← 2026 trend data, cities, colors, hair DB
+│   ├── auth.js             ← Auth + demo account seeding
+│   ├── ui.js               ← Shared utilities, toast, pills
+│   ├── photo-picker.js     ← Universal camera/gallery/files picker
+│   ├── image-analyze.js    ← Canvas-based color detection (no API)
+│   ├── fashion-engine.js   ← Core outfit intelligence
 │   ├── tryon.js            ← Virtual try-on renderer
-│   ├── dashboard.js        ← Dashboard stats + trends
-│   ├── wardrobe.js         ← Wardrobe CRUD + auto-detect integration
-│   ├── outfit.js           ← Outfit generation + swap + save
-│   ├── shop.js             ← Shopping suggestions
-│   ├── hair.js             ← Hair & beard recommendations
-│   └── profile.js          ← Profile edit + body photo + style score
+│   ├── dashboard.js
+│   ├── wardrobe.js
+│   ├── outfit.js
+│   ├── shop.js
+│   ├── hair.js
+│   └── profile.js
 └── pages/
     ├── dashboard.html
     ├── wardrobe.html
@@ -51,32 +71,18 @@ styleai/
 
 ---
 
-## Features
+## Deploy on GitHub Pages
 
-| Feature | How it works |
-|---|---|
-| **Multi-user login** | LocalStorage, no server needed |
-| **Demo account** | Pre-seeded `demo/demo123`, one tap login |
-| **Auto-detect color** | Canvas pixel analysis on clothing photo — detects dominant color automatically |
-| **Wardrobe** | 6 categories, photo upload, color/type/fit/pattern tagging |
-| **Outfit engine** | Color theory + climate + body type + 2026 trends scoring |
-| **Virtual try-on** | Upload your full-body photo → clothing badges overlaid on your photo |
-| **Save looks** | Bookmark up to 20 outfit combinations |
-| **Shop picks** | Gender-specific 2026 essentials, trending, and upgrades |
-| **Hair & Beard** | 5 face shapes × 3 genders with grooming tips |
-| **Style Score** | Dynamic score based on wardrobe diversity |
-
----
-
-## Deploy to GitHub Pages
-
-1. Create a new repo (e.g. `styleai`)
-2. Push all files keeping the folder structure intact
-3. **Settings → Pages → Source → main branch / root**
+1. Create a new GitHub repo (e.g. `styleai`)
+2. Upload **all files** maintaining the folder structure above
+3. Go to **Settings → Pages → Source → main branch / root**
 4. Live at: `https://yourusername.github.io/styleai/`
+
+> **Tip:** Use GitHub Desktop or drag-and-drop upload in the GitHub web UI for easiest upload.
 
 ---
 
 ## Privacy
-All data (wardrobe, photos, outfits) stored locally on your device using `localStorage`.  
-Nothing is ever sent to any server.
+
+All data (accounts, wardrobe, photos, outfits) is stored in `localStorage` on your device only.  
+Nothing is transmitted to any server. Ever.

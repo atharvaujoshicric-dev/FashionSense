@@ -136,45 +136,40 @@ function getUserBodyPhoto() {
 }
 
 function openBodyPhotoUpload() {
-  pendingBodyPhotoData = null;
-  document.getElementById('save-body-photo-btn').disabled = true;
-
-  // Pre-fill if exists
-  const existing = getUserBodyPhoto();
-  const preview  = document.getElementById('body-photo-preview-modal');
+  // Shows the modal with current photo; user can re-upload via picker inside modal
+  pendingBodyPhotoData = getUserBodyPhoto() || null;
+  const preview     = document.getElementById('body-photo-preview-modal');
   const placeholder = document.getElementById('body-photo-placeholder-modal');
-  if (existing) {
-    preview.src = existing;
+  if (pendingBodyPhotoData) {
+    preview.src = pendingBodyPhotoData;
     preview.classList.remove('hidden');
     placeholder.style.display = 'none';
     document.getElementById('save-body-photo-btn').disabled = false;
-    pendingBodyPhotoData = existing;
   } else {
     preview.classList.add('hidden');
     placeholder.style.display = 'flex';
+    document.getElementById('save-body-photo-btn').disabled = true;
   }
-
   document.getElementById('body-photo-modal').classList.remove('hidden');
+}
+
+// Called when user taps the photo area inside the body photo modal
+function openBodyPhotoPickerSheet() {
+  openPhotoPicker((dataUrl) => {
+    pendingBodyPhotoData = dataUrl;
+    const preview = document.getElementById('body-photo-preview-modal');
+    preview.src   = dataUrl;
+    preview.classList.remove('hidden');
+    document.getElementById('body-photo-placeholder-modal').style.display = 'none';
+    document.getElementById('save-body-photo-btn').disabled = false;
+  }, {
+    title: 'Your Full-Body Photo',
+    hint:  'Stand straight against a plain background. Full length from head to toe works best.'
+  });
 }
 
 function closeBodyPhotoModal() {
   document.getElementById('body-photo-modal').classList.add('hidden');
-}
-
-function handleBodyPhotoUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const dataUrl = e.target.result;
-    pendingBodyPhotoData = dataUrl;
-    const preview = document.getElementById('body-photo-preview-modal');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    document.getElementById('body-photo-placeholder-modal').style.display = 'none';
-    document.getElementById('save-body-photo-btn').disabled = false;
-  };
-  reader.readAsDataURL(file);
 }
 
 function saveBodyPhoto() {

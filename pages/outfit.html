@@ -136,16 +136,13 @@
       <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">
         Upload a full-length photo to see how outfits look on you. Stored privately on your device.
       </p>
-      <div class="body-photo-upload" onclick="document.getElementById('body-photo-input').click()">
+      <div class="body-photo-upload" onclick="openBodyPhotoPickerSheet()">
         <img id="body-photo-preview-modal" class="hidden" alt="Your photo" />
         <div class="body-photo-placeholder" id="body-photo-placeholder-modal">
           <span>🧍</span>
-          <p>Tap to upload full-body photo</p>
-          <small>Stand against a plain wall, full length</small>
+          <p>Tap to add full-body photo</p>
+          <small>Camera · Gallery · Files</small>
         </div>
-        <input type="file" id="body-photo-input" accept="image/*"
-               capture="environment" onchange="handleBodyPhotoUpload(this)"
-               style="display:none" />
       </div>
       <div class="modal-actions">
         <button class="btn-ghost" onclick="closeBodyPhotoModal()">Cancel</button>
@@ -166,6 +163,7 @@
   <script src="../js/auth.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/fashion-engine.js"></script>
+  <script src="../js/photo-picker.js"></script>
   <script src="../js/tryon.js"></script>
   <script src="../js/outfit.js"></script>
 </body>
