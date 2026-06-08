@@ -155,7 +155,7 @@ function openBodyPhotoUpload() {
 
 // Called when user taps the photo area inside the body photo modal
 function openBodyPhotoPickerSheet() {
-  openPhotoPicker((dataUrl) => {
+  openPhotoPicker(function(dataUrl) {
     pendingBodyPhotoData = dataUrl;
     const preview = document.getElementById('body-photo-preview-modal');
     preview.src   = dataUrl;

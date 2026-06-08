@@ -190,3 +190,18 @@
   text-align: center;
   word-break: break-word;
 }
+
+/* Color dot on items without photos */
+.wi-color-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: inline-block;
+}
+
+/* Autodetect banner flex display fix */
+.autodetect-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}

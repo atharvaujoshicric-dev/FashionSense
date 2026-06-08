@@ -45,25 +45,26 @@
       <div class="modal-handle"></div>
       <h3 class="modal-title">Add to Wardrobe</h3>
 
-      <!-- Photo (tap → picker sheet) -->
+      <!-- Photo -->
       <div class="form-group">
-        <label>Photo <span class="label-hint">· AI auto-detects color</span></label>
+        <label>Photo <span class="label-hint">· Color auto-detected from image</span></label>
         <div class="photo-upload-area" id="photo-upload-area"
              onclick="openWardrobePhotoPicker()">
           <div class="photo-placeholder" id="photo-placeholder">
             <span>📷</span>
             <p>Tap — Camera · Gallery · Files</p>
-            <small>Color is auto-detected from photo</small>
           </div>
           <img id="photo-preview" class="hidden" alt="Clothing preview" />
         </div>
+
+        <!-- Auto-detect result — uses block divs so display:none works cleanly -->
         <div id="autodetect-banner" class="autodetect-banner hidden">
-          <span id="autodetect-spinner">🔍 Detecting color…</span>
-          <span id="autodetect-result" class="hidden">
+          <div id="autodetect-spinner">🔍 Detecting color…</div>
+          <div id="autodetect-result" style="display:none;align-items:center;gap:0.5rem;flex-wrap:wrap">
             <span id="autodetect-color-swatch" class="autodetect-swatch"></span>
             <span id="autodetect-text"></span>
             <span class="autodetect-edit">· Change below if needed</span>
-          </span>
+          </div>
         </div>
       </div>
 
@@ -126,7 +127,7 @@
   <div class="modal-overlay hidden" id="item-modal">
     <div class="modal-sheet">
       <div class="modal-handle"></div>
-      <img id="item-modal-img" class="item-detail-img" alt="" />
+      <img id="item-modal-img" class="item-detail-img" alt="" style="display:none" />
       <div id="item-modal-no-img" class="hidden"></div>
       <h3 id="item-modal-title" class="modal-title"></h3>
       <p id="item-modal-meta" class="item-modal-meta"></p>

@@ -74,7 +74,7 @@ function checkBodyPhotoNudge(user) {
 }
 
 function openDashboardBodyPhotoPicker() {
-  openPhotoPicker((dataUrl) => {
+  openPhotoPicker(function(dataUrl) {
     const user = getCurrentUser();
     if (!user) return;
     updateCurrentUser({ bodyPhoto: dataUrl });

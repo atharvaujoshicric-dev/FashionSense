@@ -1,126 +1,323 @@
 /* ==========================================
-   WARDROBE.JS — Wardrobe Management
+   WARDROBE.JS
    ========================================== */
 
-let currentUser     = null;
-let wardrobeItems   = [];
-let selectedColor   = '';
-let currentFilter   = 'all';
-let currentItemId   = null;
-let pendingImageB64 = null; // holds base64 photo separately from <img> element
+let _wUser      = null;
+let _wItems     = [];
+let _wFilter    = 'all';
+let _wItemId    = null;
+let _wPhoto     = null;   // base64 of pending clothing photo
+let _wColor     = '';     // selected color name
 
 document.addEventListener('DOMContentLoaded', () => {
-  currentUser = requireAuth();
-  if (!currentUser) return;
-  wardrobeItems = loadWardrobe();
-  renderColorPicker();
-  renderWardrobe();
-  onCategoryChange();
+  _wUser  = requireAuth();
+  if (!_wUser) return;
+  _wItems = _load();
+  _buildColorSwatches();
+  _render();
+  _syncSubtypes();
 });
 
 // ── Storage ───────────────────────────────────────────────────────────────────
 
-function loadWardrobe() {
+function _load() {
   try {
-    const raw = localStorage.getItem('styleai_wardrobe_' + currentUser.username);
+    const raw = localStorage.getItem('styleai_wardrobe_' + _wUser.username);
     return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    console.warn('loadWardrobe:', e);
-    return [];
-  }
+  } catch { return []; }
 }
 
-function saveWardrobe() {
+function _save() {
   try {
-    localStorage.setItem(
-      'styleai_wardrobe_' + currentUser.username,
-      JSON.stringify(wardrobeItems)
-    );
+    localStorage.setItem('styleai_wardrobe_' + _wUser.username, JSON.stringify(_wItems));
     return true;
   } catch (e) {
-    showToast('Storage full — try removing old items or use smaller photos', 'error');
-    console.warn('saveWardrobe quota error:', e);
+    showToast('Storage full — try a smaller photo or remove old items', 'error');
+    console.warn('wardrobe save failed:', e);
     return false;
   }
 }
 
-// ── Grid ──────────────────────────────────────────────────────────────────────
+// ── Grid render ───────────────────────────────────────────────────────────────
 
-function renderWardrobe() {
+function _render() {
   const grid  = document.getElementById('wardrobe-grid');
   const empty = document.getElementById('empty-state');
-  const filtered = currentFilter === 'all'
-    ? wardrobeItems
-    : wardrobeItems.filter(i => i.category === currentFilter);
+  const list  = _wFilter === 'all' ? _wItems : _wItems.filter(i => i.category === _wFilter);
 
-  if (filtered.length === 0) {
+  if (list.length === 0) {
     grid.innerHTML = '';
     if (empty) { empty.style.display = 'flex'; grid.appendChild(empty); }
     return;
   }
-
   if (empty) empty.style.display = 'none';
   grid.innerHTML = '';
 
-  filtered.forEach(item => {
+  list.forEach(item => {
     const el = document.createElement('div');
     el.className = 'wardrobe-item';
-    el.onclick = () => openItemModal(item.id);
+    el.onclick   = () => _openDetail(item.id);
+
     if (item.imageData) {
-      el.innerHTML = `<img src="${item.imageData}" alt="${item.subtype}" loading="lazy" />
+      el.innerHTML = `
+        <img src="${item.imageData}" alt="${item.subtype}" loading="lazy" />
         <div class="wardrobe-item-badge">${item.subtype}</div>`;
     } else {
-      el.innerHTML = `<div class="wardrobe-item-placeholder">
-        <span>${getCategoryEmoji(item.category)}</span>
-        <span class="wi-label">${item.color}<br/>${item.subtype}</span>
-      </div>`;
+      const dot = _hexFor(item.color);
+      el.innerHTML = `
+        <div class="wardrobe-item-placeholder">
+          <span>${_catEmoji(item.category)}</span>
+          ${dot ? `<span class="wi-color-dot" style="background:${dot}"></span>` : ''}
+          <span class="wi-label">${item.color}<br/>${item.subtype}</span>
+        </div>`;
     }
     grid.appendChild(el);
   });
 }
 
 function filterCategory(cat, btn) {
-  currentFilter = cat;
+  _wFilter = cat;
   document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  renderWardrobe();
-}
-
-function getCategoryEmoji(cat) {
-  return { tops:'👕', bottoms:'👖', outerwear:'🧥', footwear:'👟', accessories:'⌚', ethnic:'🥻' }[cat] || '👗';
+  _render();
 }
 
 // ── Upload modal ──────────────────────────────────────────────────────────────
 
 function openUploadModal() {
-  pendingImageB64 = null;
+  _wPhoto = null;
+  _wColor = '';
 
-  const modal = document.getElementById('upload-modal');
-  const preview = document.getElementById('photo-preview');
-  const placeholder = document.getElementById('photo-placeholder');
-  const banner = document.getElementById('autodetect-banner');
-  const badge  = document.getElementById('detected-color-badge');
-
-  modal.classList.remove('hidden');
-  preview.classList.add('hidden');
-  preview.src = '';
-  placeholder.style.display = 'flex';
-  if (banner) banner.classList.add('hidden');
-  if (badge)  badge.classList.add('hidden');
-
-  selectedColor = '';
-  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  document.getElementById('upload-modal').classList.remove('hidden');
+  _setPhotoState(null);
+  document.getElementById('autodetect-banner').classList.add('hidden');
+  document.getElementById('detected-color-badge').classList.add('hidden');
   document.getElementById('upload-color-custom').value = '';
-  resetPillGroup('pattern-group', 'solid');
-  resetPillGroup('fit-group', 'regular');
+
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  _resetPills('pattern-group', 'solid');
+  _resetPills('fit-group', 'regular');
+  _syncSubtypes();
 }
 
 function closeUploadModal() {
   document.getElementById('upload-modal').classList.add('hidden');
-  pendingImageB64 = null;
+  _wPhoto = null;
+  _wColor = '';
 }
 
-function resetPillGroup(groupId, defaultVal) {
+function _setPhotoState(dataUrl) {
+  const preview     = document.getElementById('photo-preview');
+  const placeholder = document.getElementById('photo-placeholder');
+  if (dataUrl) {
+    preview.src = dataUrl;
+    preview.classList.remove('hidden');
+    placeholder.style.display = 'none';
+  } else {
+    preview.src = '';
+    preview.classList.add('hidden');
+    placeholder.style.display = 'flex';
+  }
+}
+
+// ── Photo picker ──────────────────────────────────────────────────────────────
+
+function openWardrobePhotoPicker() {
+  openPhotoPicker(function(dataUrl) {
+    if (!dataUrl || !dataUrl.startsWith('data:')) {
+      showToast('Photo could not be loaded', 'error');
+      return;
+    }
+    _wPhoto = dataUrl;           // store in module-level var
+    _setPhotoState(dataUrl);     // show preview
+    _runAutoDetect(dataUrl);     // detect color
+  }, {
+    title: 'Clothing Photo',
+    hint:  'Take a photo or pick from gallery. Color is auto-detected from the image.'
+  });
+}
+
+// ── Auto color detection ──────────────────────────────────────────────────────
+
+async function _runAutoDetect(dataUrl) {
+  const banner   = document.getElementById('autodetect-banner');
+  const spinner  = document.getElementById('autodetect-spinner');
+  const resultEl = document.getElementById('autodetect-result');
+
+  // Show banner + spinner
+  banner.classList.remove('hidden');
+  spinner.style.display  = 'inline';
+  resultEl.style.display = 'none';
+
+  let detected = { color: '', detectedHex: '', confidence: 0 };
+  try {
+    const cat = document.getElementById('upload-category')?.value || 'tops';
+    detected  = await analyzeClothingImage(dataUrl, cat);
+  } catch (e) {
+    console.warn('autodetect error:', e);
+  }
+
+  // Hide spinner, show result
+  spinner.style.display  = 'none';
+  resultEl.style.display = 'inline';
+
+  const hasColor = detected && detected.color && detected.color !== 'unknown' && detected.color !== '';
+
+  if (hasColor) {
+    _applyColor(detected.color, detected.detectedHex);
+
+    const sw = document.getElementById('autodetect-color-swatch');
+    const tx = document.getElementById('autodetect-text');
+    const bd = document.getElementById('detected-color-badge');
+
+    if (sw) sw.style.background = detected.detectedHex || '#888';
+    if (tx) tx.textContent = 'Detected: ' + detected.color +
+      (detected.confidence > 0 ? ' (' + detected.confidence + '% confidence)' : '');
+    if (bd) { bd.textContent = '✦ ' + detected.color + ' detected'; bd.classList.remove('hidden'); }
+  } else {
+    const tx = document.getElementById('autodetect-text');
+    if (tx) tx.textContent = 'Could not detect — please pick color below';
+  }
+}
+
+function _applyColor(name, hex) {
+  let matched = false;
+  document.querySelectorAll('.color-swatch').forEach(sw => {
+    sw.classList.remove('selected');
+    if (sw.dataset.name === name) {
+      sw.classList.add('selected');
+      _wColor = name;
+      matched = true;
+    }
+  });
+  if (!matched) {
+    const cf = document.getElementById('upload-color-custom');
+    if (cf) cf.value = name;
+    _wColor = name;
+  }
+}
+
+// ── Color picker swatches ─────────────────────────────────────────────────────
+
+function _buildColorSwatches() {
+  const row = document.getElementById('color-picker-row');
+  if (!row) return;
+  row.innerHTML = '';
+  (typeof COLORS !== 'undefined' ? COLORS : []).forEach(c => {
+    const sw = document.createElement('div');
+    sw.className             = 'color-swatch';
+    sw.style.backgroundColor = c.hex;
+    sw.dataset.name          = c.name;
+    sw.title                 = c.name;
+    sw.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      _wColor = c.name;
+      document.getElementById('upload-color-custom').value = '';
+    };
+    row.appendChild(sw);
+  });
+}
+
+function onCategoryChange() { _syncSubtypes(); }
+
+function _syncSubtypes() {
+  const cat  = document.getElementById('upload-category')?.value;
+  const sel  = document.getElementById('upload-subtype');
+  if (!cat || !sel) return;
+  const list = (typeof SUBTYPES_BY_CATEGORY !== 'undefined' ? SUBTYPES_BY_CATEGORY[cat] : null) || [];
+  sel.innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+// ── Save item ─────────────────────────────────────────────────────────────────
+
+function saveClothingItem() {
+  const category = document.getElementById('upload-category').value;
+  const subtype  = document.getElementById('upload-subtype').value;
+  const custom   = (document.getElementById('upload-color-custom').value || '').trim();
+  const color    = custom || _wColor;
+  const pattern  = _activePill('pattern-group') || 'solid';
+  const fit      = _activePill('fit-group')     || 'regular';
+
+  if (!category) { showToast('Please select a category', 'error'); return; }
+  if (!color)    { showToast('Please select or type a color', 'error'); return; }
+
+  const item = {
+    id:        String(Date.now()),
+    category, subtype, color, pattern, fit,
+    imageData: _wPhoto || null,
+    addedAt:   Date.now()
+  };
+
+  _wItems.push(item);
+  const ok = _save();
+
+  if (ok) {
+    closeUploadModal();
+    _render();
+    showToast(subtype + ' added ✦');
+  } else {
+    _wItems.pop(); // rollback
+  }
+}
+
+// ── Item detail ───────────────────────────────────────────────────────────────
+
+function _openDetail(id) {
+  const item = _wItems.find(i => i.id === id);
+  if (!item) return;
+  _wItemId = id;
+
+  const imgEl = document.getElementById('item-modal-img');
+  const noImg = document.getElementById('item-modal-no-img');
+
+  if (item.imageData) {
+    imgEl.src = item.imageData; imgEl.style.display = 'block';
+    noImg.classList.add('hidden');
+  } else {
+    imgEl.style.display = 'none'; imgEl.src = '';
+    noImg.classList.remove('hidden');
+    noImg.innerHTML = `<div style="font-size:4rem;text-align:center;padding:2rem">${_catEmoji(item.category)}</div>`;
+  }
+
+  document.getElementById('item-modal-title').textContent =
+    item.color.charAt(0).toUpperCase() + item.color.slice(1) + ' ' + item.subtype;
+  document.getElementById('item-modal-meta').textContent =
+    item.category + ' · ' + item.pattern + ' · ' + item.fit + ' fit';
+  document.getElementById('item-modal').classList.remove('hidden');
+}
+
+function closeItemModal() {
+  document.getElementById('item-modal').classList.add('hidden');
+  _wItemId = null;
+}
+
+function deleteCurrentItem() {
+  if (!_wItemId) return;
+  if (!confirm('Remove this item from your wardrobe?')) return;
+  _wItems = _wItems.filter(i => i.id !== _wItemId);
+  _save();
+  closeItemModal();
+  _render();
+  showToast('Item removed');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function _catEmoji(cat) {
+  return {tops:'👕',bottoms:'👖',outerwear:'🧥',footwear:'👟',accessories:'⌚',ethnic:'🥻'}[cat]||'👗';
+}
+
+function _hexFor(colorName) {
+  if (typeof COLORS === 'undefined') return null;
+  return (COLORS.find(c => c.name === colorName) || {}).hex || null;
+}
+
+function _activePill(groupId) {
+  return document.querySelector('#' + groupId + ' .pill.active')?.dataset.val || null;
+}
+
+function _resetPills(groupId, defaultVal) {
   const group = document.getElementById(groupId);
   if (!group) return;
   group.querySelectorAll('.pill').forEach(p => {
@@ -128,207 +325,5 @@ function resetPillGroup(groupId, defaultVal) {
   });
 }
 
-// ── Photo picker ──────────────────────────────────────────────────────────────
-
-function openWardrobePhotoPicker() {
-  openPhotoPicker((dataUrl) => {
-    if (!dataUrl) return;
-    pendingImageB64 = dataUrl; // store separately — this is what gets saved
-
-    // Show preview
-    const preview     = document.getElementById('photo-preview');
-    const placeholder = document.getElementById('photo-placeholder');
-    preview.src = dataUrl;
-    preview.classList.remove('hidden');
-    placeholder.style.display = 'none';
-
-    // Kick off auto-detect
-    runAutoDetect(dataUrl);
-  }, {
-    title: 'Clothing Photo',
-    hint:  'Take a photo or choose from gallery / files. Color is detected automatically.'
-  });
-}
-
-// ── Auto-detect ───────────────────────────────────────────────────────────────
-
-async function runAutoDetect(dataUrl) {
-  const banner   = document.getElementById('autodetect-banner');
-  const spinner  = document.getElementById('autodetect-spinner');
-  const resultEl = document.getElementById('autodetect-result');
-  if (!banner) return;
-
-  // Show spinner
-  banner.classList.remove('hidden');
-  if (spinner)  { spinner.style.display = 'inline'; }
-  if (resultEl) { resultEl.classList.add('hidden'); }
-
-  // Run detection
-  let detected;
-  try {
-    const category = document.getElementById('upload-category')?.value || 'tops';
-    detected = await analyzeClothingImage(dataUrl, category);
-  } catch (e) {
-    console.warn('autodetect error:', e);
-    detected = { color: '', detectedHex: '', confidence: 0 };
-  }
-
-  // Hide spinner, show result
-  if (spinner)  { spinner.style.display = 'none'; }
-  if (resultEl) { resultEl.classList.remove('hidden'); }
-
-  const textEl   = document.getElementById('autodetect-text');
-  const swatchEl = document.getElementById('autodetect-color-swatch');
-  const badge    = document.getElementById('detected-color-badge');
-
-  const gotColor = detected && detected.color && detected.color !== '' && detected.color !== 'unknown';
-
-  if (gotColor) {
-    applyDetectedColor(detected.color, detected.detectedHex);
-
-    if (textEl)   textEl.textContent =
-      'Detected: ' + detected.color +
-      (detected.confidence > 0 ? ' (' + detected.confidence + '% match)' : '');
-    if (swatchEl && detected.detectedHex) swatchEl.style.background = detected.detectedHex;
-    if (badge) {
-      badge.textContent = '✦ Auto-detected: ' + detected.color;
-      badge.classList.remove('hidden');
-    }
-  } else {
-    if (textEl) textEl.textContent = 'Could not detect color — please choose below';
-    if (badge)  badge.classList.add('hidden');
-  }
-}
-
-function applyDetectedColor(colorName, hex) {
-  // Try to match a named swatch
-  let matched = false;
-  document.querySelectorAll('.color-swatch').forEach(sw => {
-    sw.classList.remove('selected');
-    if (sw.dataset.name === colorName) {
-      sw.classList.add('selected');
-      selectedColor = colorName;
-      matched = true;
-    }
-  });
-  if (!matched) {
-    // No exact swatch match — put in the text field
-    const customEl = document.getElementById('upload-color-custom');
-    if (customEl) customEl.value = colorName;
-    selectedColor = colorName; // still set so save works
-  }
-}
-
-// ── Color picker ──────────────────────────────────────────────────────────────
-
-function renderColorPicker() {
-  const row = document.getElementById('color-picker-row');
-  if (!row) return;
-  row.innerHTML = '';
-  COLORS.forEach(c => {
-    const sw = document.createElement('div');
-    sw.className = 'color-swatch';
-    sw.style.backgroundColor = c.hex;
-    sw.dataset.name = c.name;
-    sw.title = c.name;
-    sw.onclick = () => {
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-      sw.classList.add('selected');
-      selectedColor = c.name;
-      document.getElementById('upload-color-custom').value = '';
-    };
-    row.appendChild(sw);
-  });
-}
-
-function onCategoryChange() {
-  const cat    = document.getElementById('upload-category')?.value;
-  const subSel = document.getElementById('upload-subtype');
-  if (!cat || !subSel) return;
-  const subtypes = SUBTYPES_BY_CATEGORY[cat] || [];
-  subSel.innerHTML = subtypes.map(s => `<option value="${s}">${s}</option>`).join('');
-}
-
-// ── Save item ─────────────────────────────────────────────────────────────────
-
-function saveClothingItem() {
-  const category    = document.getElementById('upload-category').value;
-  const subtype     = document.getElementById('upload-subtype').value;
-  const customColor = document.getElementById('upload-color-custom').value.trim();
-  const color       = customColor || selectedColor;
-  const pattern     = getActivePillVal('pattern-group') || 'solid';
-  const fit         = getActivePillVal('fit-group')     || 'regular';
-
-  if (!color) {
-    showToast('Please pick or type a color first', 'error');
-    return;
-  }
-
-  const item = {
-    id:        Date.now().toString(),
-    category,  subtype, color, pattern, fit,
-    imageData: pendingImageB64 || null,  // use dedicated variable — never preview.src
-    addedAt:   Date.now()
-  };
-
-  wardrobeItems.push(item);
-  const ok = saveWardrobe();
-
-  if (ok) {
-    closeUploadModal();
-    renderWardrobe();
-    showToast(subtype + ' saved to wardrobe ✦');
-  } else {
-    wardrobeItems.pop(); // rollback on save failure
-  }
-}
-
-// ── Item modal ────────────────────────────────────────────────────────────────
-
-function openItemModal(id) {
-  const item = wardrobeItems.find(i => i.id === id);
-  if (!item) return;
-  currentItemId = id;
-
-  const imgEl = document.getElementById('item-modal-img');
-  const noImg = document.getElementById('item-modal-no-img');
-
-  if (item.imageData) {
-    imgEl.src   = item.imageData;
-    imgEl.style.display = 'block';
-    if (noImg) noImg.classList.add('hidden');
-  } else {
-    imgEl.style.display = 'none';
-    if (noImg) {
-      noImg.classList.remove('hidden');
-      noImg.innerHTML = '<div style="font-size:4rem;text-align:center;padding:2rem">'
-        + getCategoryEmoji(item.category) + '</div>';
-    }
-  }
-
-  document.getElementById('item-modal-title').textContent = item.color + ' ' + item.subtype;
-  document.getElementById('item-modal-meta').textContent  =
-    item.category + ' · ' + item.pattern + ' · ' + item.fit + ' fit';
-  document.getElementById('item-modal').classList.remove('hidden');
-}
-
-function closeItemModal() {
-  document.getElementById('item-modal').classList.add('hidden');
-  currentItemId = null;
-}
-
-function deleteCurrentItem() {
-  if (!currentItemId) return;
-  if (!confirm('Remove this item from your wardrobe?')) return;
-  wardrobeItems = wardrobeItems.filter(i => i.id !== currentItemId);
-  saveWardrobe();
-  closeItemModal();
-  renderWardrobe();
-  showToast('Item removed');
-}
-
-// ── Helper ────────────────────────────────────────────────────────────────────
-
-function getActivePillVal(groupId) {
-  return document.getElementById(groupId)?.querySelector('.pill.active')?.dataset.val || null;
-}
+// Exposed for use in other modules (fashion-engine, outfit.js etc.)
+function getWardrobeItems() { return _wItems; }
