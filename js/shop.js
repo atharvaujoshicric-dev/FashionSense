@@ -10,6 +10,7 @@ let currentShopItem  = null;
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
+  initAvatar(currentUser);
 
   const gender    = currentUser.gender || 'male';
   const genderKey = gender === 'nonbinary' ? 'nonbinary' : gender;

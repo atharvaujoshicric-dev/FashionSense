@@ -7,6 +7,7 @@ let _pkUser = null;
 document.addEventListener('DOMContentLoaded', () => {
   _pkUser = requireAuth();
   if (!_pkUser) return;
+  initAvatar(_pkUser);
   populateCitySelect('pack-city', _pkUser.city);
 });
 

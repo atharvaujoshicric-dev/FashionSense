@@ -12,6 +12,7 @@ let _wColor     = '';     // selected color name
 document.addEventListener('DOMContentLoaded', () => {
   _wUser  = requireAuth();
   if (!_wUser) return;
+  initAvatar(_wUser);
   _wItems = _load();
   _buildColorSwatches();
   _render();

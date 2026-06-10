@@ -7,6 +7,7 @@ let _aUser = null;
 document.addEventListener('DOMContentLoaded', () => {
   _aUser = requireAuth();
   if (!_aUser) return;
+  initAvatar(_aUser);
   runAnalysis();
 });
 

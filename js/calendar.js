@@ -13,6 +13,7 @@ let _calSelDay = null;
 document.addEventListener('DOMContentLoaded', () => {
   _calUser  = requireAuth();
   if (!_calUser) return;
+  initAvatar(_calUser);
 
   const now    = new Date();
   _calYear     = now.getFullYear();

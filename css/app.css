@@ -407,3 +407,90 @@ body {
   text-align: center;
   margin-top: 0.5rem;
 }
+
+/* ==========================================
+   TOPBAR AVATAR — profile photo in topbar
+   ========================================== */
+
+.topbar-avatar-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.topbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 400;
+  overflow: hidden;
+  flex-shrink: 0;
+  /* background-image set by avatar.js when photo exists */
+  background-size: cover;
+  background-position: center;
+  transition: border-color 0.2s;
+}
+
+.topbar-avatar:active { border-color: var(--accent-light); }
+
+/* Large avatar on profile page */
+.avatar-wrapper {
+  position: relative;
+  width: 90px;
+  margin: 0 auto 0.5rem;
+  cursor: pointer;
+}
+
+.avatar-wrapper .avatar-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  color: var(--accent);
+  margin: 0;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.2s;
+}
+
+.avatar-wrapper:active .avatar-circle { opacity: 0.8; }
+
+/* Edit badge over avatar */
+.avatar-edit-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+/* Profile photo hint */
+.profile-photo-hint {
+  font-size: 0.78rem;
+  color: var(--accent);
+  text-align: center;
+  margin-top: 0.25rem;
+  animation: fadeIn 0.3s ease;
+}

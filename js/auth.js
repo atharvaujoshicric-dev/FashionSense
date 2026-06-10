@@ -5,11 +5,12 @@
 const AUTH_KEY    = 'styleai_users';
 const SESSION_KEY = 'styleai_session';
 
-// Body photo is stored separately (it's a large base64 image — storing it
-// inside the users object would blow the 5MB localStorage quota)
-function _bodyPhotoKey(username) { return 'styleai_body_photo_' + username; }
+// Large images stored in separate keys to avoid blowing the users-object quota
+function _bodyPhotoKey(u)   { return 'styleai_body_photo_'    + u; }
+function _profilePhotoKey(u){ return 'styleai_profile_photo_' + u; }
 
 // ── Demo account ──────────────────────────────────────────────────────────────
+
 const DEMO_USER = {
   name: 'Demo User', username: 'demo',
   password: btoa('demo123'),
@@ -41,8 +42,9 @@ function getCurrentUser() {
     const users = getUsers();
     const user  = users[session.username];
     if (!user) return null;
-    // Attach body photo from its own key (not stored in users object)
-    user.bodyPhoto = localStorage.getItem(_bodyPhotoKey(user.username)) || null;
+    // Attach large photos from their own keys
+    user.bodyPhoto    = localStorage.getItem(_bodyPhotoKey(user.username))    || null;
+    user.profilePhoto = localStorage.getItem(_profilePhotoKey(user.username)) || null;
     return user;
   } catch { return null; }
 }
@@ -56,8 +58,8 @@ function clearSession() {
 }
 
 /**
- * updateCurrentUser — updates profile fields.
- * bodyPhoto is handled separately to avoid quota issues.
+ * updateCurrentUser — saves profile fields.
+ * bodyPhoto and profilePhoto are stored in their own keys (large base64).
  */
 function updateCurrentUser(updates) {
   const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
@@ -66,33 +68,40 @@ function updateCurrentUser(updates) {
   const users = getUsers();
   if (!users[session.username]) return null;
 
-  // Pull out bodyPhoto before merging into users object
-  const { bodyPhoto, ...profileUpdates } = updates;
+  // Extract large photo fields before saving to users object
+  const { bodyPhoto, profilePhoto, ...profileUpdates } = updates;
 
-  // Save body photo to its own key
+  // Store body photo separately
   if (bodyPhoto !== undefined) {
     try {
-      if (bodyPhoto) {
-        localStorage.setItem(_bodyPhotoKey(session.username), bodyPhoto);
-      } else {
-        localStorage.removeItem(_bodyPhotoKey(session.username));
-      }
+      bodyPhoto
+        ? localStorage.setItem(_bodyPhotoKey(session.username), bodyPhoto)
+        : localStorage.removeItem(_bodyPhotoKey(session.username));
     } catch (e) {
-      // Photo too large even for its own key — rare
-      console.warn('Body photo storage failed:', e);
-      if (typeof showToast === 'function') {
-        showToast('Photo too large — try a smaller image', 'error');
-      }
+      console.warn('bodyPhoto save failed:', e);
+      if (typeof showToast === 'function') showToast('Photo too large — try a smaller image', 'error');
     }
   }
 
-  // Save remaining profile fields
+  // Store profile photo separately
+  if (profilePhoto !== undefined) {
+    try {
+      profilePhoto
+        ? localStorage.setItem(_profilePhotoKey(session.username), profilePhoto)
+        : localStorage.removeItem(_profilePhotoKey(session.username));
+    } catch (e) {
+      console.warn('profilePhoto save failed:', e);
+      if (typeof showToast === 'function') showToast('Profile photo too large — try a smaller image', 'error');
+    }
+  }
+
+  // Save all other profile fields
   if (Object.keys(profileUpdates).length > 0) {
     users[session.username] = { ...users[session.username], ...profileUpdates };
     saveUsers(users);
   }
 
-  return getCurrentUser(); // return the updated user (with bodyPhoto attached)
+  return getCurrentUser();
 }
 
 // ── Auth handlers ─────────────────────────────────────────────────────────────
@@ -125,16 +134,16 @@ function handleRegister() {
   const bodyType  = getActivePillVal('bodytype-group');
   const faceShape = getActivePillVal('faceshape-group');
 
-  if (!name)              { showAuthError(errEl, 'Please enter your full name.'); return; }
-  if (!username)          { showAuthError(errEl, 'Please choose a username.');    return; }
-  if (username.length < 3){ showAuthError(errEl, 'Username must be at least 3 characters.'); return; }
-  if (!password)          { showAuthError(errEl, 'Please enter a password.');     return; }
-  if (password.length < 6){ showAuthError(errEl, 'Password must be at least 6 characters.'); return; }
-  if (!gender)            { showAuthError(errEl, 'Please select your gender.');   return; }
-  if (username === 'demo'){ showAuthError(errEl, '"demo" is reserved. Pick another username.'); return; }
+  if (!name)               { showAuthError(errEl, 'Please enter your full name.');         return; }
+  if (!username)           { showAuthError(errEl, 'Please choose a username.');             return; }
+  if (username.length < 3) { showAuthError(errEl, 'Username must be at least 3 characters.'); return; }
+  if (!password)           { showAuthError(errEl, 'Please enter a password.');              return; }
+  if (password.length < 6) { showAuthError(errEl, 'Password must be at least 6 characters.'); return; }
+  if (!gender)             { showAuthError(errEl, 'Please select your gender.');            return; }
+  if (username === 'demo') { showAuthError(errEl, '"demo" is reserved. Pick another.'); return; }
 
   const users = getUsers();
-  if (users[username])    { showAuthError(errEl, 'Username already taken.'); return; }
+  if (users[username]) { showAuthError(errEl, 'Username already taken.'); return; }
 
   users[username] = {
     name, username, password: btoa(password),
@@ -163,16 +172,17 @@ function logout() {
 
 function deleteAccount() {
   const user = getCurrentUser();
-  if (user?.isDemo) { if(typeof showToast==='function') showToast('Cannot delete demo account','error'); return; }
+  if (user?.isDemo) { if (typeof showToast === 'function') showToast('Cannot delete demo account', 'error'); return; }
   if (!confirm('Delete your account and all data? This cannot be undone.')) return;
   const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
   if (session) {
+    const u = session.username;
     const users = getUsers();
-    delete users[session.username];
+    delete users[u];
     saveUsers(users);
-    localStorage.removeItem('styleai_wardrobe_'      + session.username);
-    localStorage.removeItem('styleai_saved_outfits_' + session.username);
-    localStorage.removeItem(_bodyPhotoKey(session.username));
+    ['styleai_wardrobe_', 'styleai_saved_outfits_', 'styleai_calendar_'].forEach(k => localStorage.removeItem(k + u));
+    localStorage.removeItem(_bodyPhotoKey(u));
+    localStorage.removeItem(_profilePhotoKey(u));
   }
   clearSession();
   window.location.href = '../index.html';
@@ -194,8 +204,7 @@ function showAuthError(el, msg) {
 }
 
 function getActivePillVal(groupId) {
-  return document.querySelector(`#${groupId} .pill.active`)?.dataset.val || null;
+  return document.querySelector('#' + groupId + ' .pill.active')?.dataset.val || null;
 }
 
-// Seed demo on load
 seedDemoAccount();

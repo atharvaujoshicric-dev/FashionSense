@@ -7,6 +7,7 @@ let _dashUser = null;
 document.addEventListener('DOMContentLoaded', async () => {
   _dashUser = requireAuth();
   if (!_dashUser) return;
+  initAvatar(_dashUser);
 
   // Greeting
   const hour  = new Date().getHours();

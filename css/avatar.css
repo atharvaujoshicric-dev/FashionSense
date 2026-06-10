@@ -1,0 +1,253 @@
+/* ==========================================
+   AVATAR.CSS — Cartoon Avatar Styles
+   ========================================== */
+
+/* ── Avatar container ── */
+.avatar-stage {
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 200/340;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-stage svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Floor line */
+.avatar-stage::after {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+/* Loading state */
+.avatar-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 100%;
+  color: var(--text-muted);
+}
+
+.avatar-loading-fig {
+  font-size: 3rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.5;transform:scale(0.95)}
+}
+
+.avatar-loading p { font-size: 0.75rem; }
+
+/* ── Outfit try-on section ── */
+.tryon-avatar-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin: 0 1rem 1rem;
+  overflow: hidden;
+}
+
+.tryon-avatar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.tryon-avatar-header h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tryon-avatar-body {
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+/* Avatar column */
+.tryon-avatar-col {
+  flex: 0 0 48%;
+  max-width: 48%;
+}
+
+/* Outfit pieces column */
+.tryon-pieces-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tryon-piece-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.65rem;
+}
+
+.tryon-piece-thumb {
+  width: 32px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.tryon-piece-emoji {
+  width: 32px;
+  height: 40px;
+  background: var(--bg-card);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.tryon-piece-details { flex: 1; min-width: 0; }
+
+.tryon-piece-cat {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.tryon-piece-name {
+  font-size: 0.72rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+/* ── Topbar mini avatar ── */
+.topbar-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-dim);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.topbar-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.topbar-avatar-initials {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--accent);
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* ── Profile photo section ── */
+.profile-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.profile-photo-ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  overflow: hidden;
+  background: var(--accent-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-photo-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-initials-lg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  color: var(--accent);
+}
+
+.profile-photo-edit-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}
+
+.profile-avatar-mini-stage {
+  width: 140px;
+  aspect-ratio: 200/340;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-avatar-mini-stage svg {
+  width: 100%;
+  height: 100%;
+}

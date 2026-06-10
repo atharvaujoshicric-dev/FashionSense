@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/app.css" />
   <link rel="stylesheet" href="../css/outfit.css" />
   <link rel="stylesheet" href="../css/tryon.css" />
+  <link rel="stylesheet" href="../css/avatar.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -20,7 +21,9 @@
     <div class="topbar-right">
       <div class="city-chip" id="outfit-city-chip" onclick="showCityPicker()">
         📍 <span id="outfit-city-label">Mumbai</span>
-      </div>
+      
+      <a href="profile.html" class="topbar-avatar-link"><div class="topbar-avatar avatar-circle"></div></a>
+    </div>
     </div>
   </header>
 
@@ -66,14 +69,21 @@
       </div>
     </div>
 
-    <!-- ── VIRTUAL TRY-ON ── -->
-    <div class="tryon-section" id="tryon-section">
-      <div class="tryon-section-header">
+    <!-- ── AVATAR TRY-ON ── -->
+    <div class="tryon-avatar-section" id="tryon-section">
+      <div class="tryon-avatar-header">
         <h4>🪞 Virtual Try-On</h4>
-        <button class="icon-btn-sm" onclick="openBodyPhotoUpload()" title="Update your photo">📷</button>
+        <button class="icon-btn-sm" onclick="goToProfile()" title="Edit profile/photo">✎</button>
       </div>
-      <div class="tryon-section-body" id="tryon-body">
-        <!-- Rendered by tryon.js -->
+      <div class="tryon-avatar-body" id="tryon-body">
+        <!-- Left: animated avatar -->
+        <div class="tryon-avatar-col">
+          <div class="avatar-stage" id="outfit-avatar-stage">
+            <div class="avatar-loading"><div class="avatar-loading-fig">🧍</div></div>
+          </div>
+        </div>
+        <!-- Right: piece list -->
+        <div class="tryon-pieces-col" id="tryon-pieces-col"></div>
       </div>
     </div>
 
@@ -171,7 +181,9 @@
   <script src="../js/theme.js"></script>
   <script src="../js/weather.js"></script>
   <script src="../js/share-card.js"></script>
+  <script src="../js/avatar.js"></script>
   <script src="../js/tryon.js"></script>
   <script src="../js/outfit.js"></script>
+  <script src="../js/avatar.js"></script>
 </body>
 </html>

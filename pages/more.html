@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/app.css" />
   <link rel="stylesheet" href="../css/features.css" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/avatar.css" />
 </head>
 <body>
   <header class="topbar">
@@ -17,6 +18,8 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme">☀️</button>
+    
+      <a href="profile.html" class="topbar-avatar-link"><div class="topbar-avatar avatar-circle"></div></a>
     </div>
   </header>
 
@@ -97,10 +100,12 @@
   <script src="../js/theme.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      requireAuth();
+      const _moreUser = requireAuth();
+      if (_moreUser) initAvatar(_moreUser);
       const lbl = document.getElementById('theme-label');
       if (lbl) lbl.textContent = getTheme() === 'dark' ? 'Dark Mode' : 'Light Mode';
     });
   </script>
+  <script src="../js/avatar.js"></script>
 </body>
 </html>

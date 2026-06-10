@@ -8,6 +8,7 @@ let selectedFaceShape = null;
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
+  initAvatar(currentUser);
 
   // Pre-select from profile
   if (currentUser.faceShape) {

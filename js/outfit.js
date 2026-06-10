@@ -12,6 +12,7 @@ let pendingBodyPhotoData = null;
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
+  initAvatar(currentUser);
 
   currentCity = currentUser.city || 'Mumbai';
   document.getElementById('outfit-city-label').textContent = currentCity;
@@ -112,31 +113,38 @@ function renderOutfitResult(result) {
   resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Virtual Try-On ────────────────────────────────────────────────────────────
+// ── Avatar Try-On ──────────────────────────────────────────────────────────────
 
-function refreshTryOnSection(slots) {
-  const body = document.getElementById('tryon-body');
-  const userPhoto = getUserBodyPhoto();
+async function refreshTryOnSection(slots) {
+  const stage  = document.getElementById('outfit-avatar-stage');
+  const pieces = document.getElementById('tryon-pieces-col');
+  if (!stage) return;
 
-  if (!userPhoto) {
-    renderTryOnNoPhoto(body, 'openBodyPhotoUpload');
-    return;
+  // Render animated avatar with outfit
+  await renderAvatarWithOutfit(stage, currentUser, slots);
+
+  // Render piece list on the right
+  if (pieces && slots) {
+    pieces.innerHTML = '';
+    slots.forEach(slot => {
+      const row = document.createElement('div');
+      row.className = 'tryon-piece-row';
+      const imgEl = slot.item.imageData
+        ? `<img src="${slot.item.imageData}" class="tryon-piece-thumb" />`
+        : `<div class="tryon-piece-emoji">${_catEmoji(slot.item.category)}</div>`;
+      row.innerHTML = `
+        ${imgEl}
+        <div class="tryon-piece-details">
+          <div class="tryon-piece-cat">${slot.label}</div>
+          <div class="tryon-piece-name">${cap(slot.item.color)} ${slot.item.subtype}</div>
+        </div>`;
+      pieces.appendChild(row);
+    });
   }
-
-  if (!slots) {
-    body.innerHTML = `
-      <div class="tryon-no-photo" style="padding:1rem">
-        <div style="font-size:1.5rem">✦</div>
-        <p style="font-size:0.82rem;color:var(--text-secondary)">Generate an outfit to see virtual try-on</p>
-      </div>`;
-    return;
-  }
-
-  renderTryOn(userPhoto, slots, body);
 }
 
-function getUserBodyPhoto() {
-  return currentUser?.bodyPhoto || null;
+function goToProfile() {
+  window.location.href = 'profile.html';
 }
 
 function openBodyPhotoUpload() {
