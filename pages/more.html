@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/app.css" />
   <link rel="stylesheet" href="../css/features.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/avatar.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
 <body>
   <header class="topbar">
@@ -24,6 +24,14 @@
   </header>
 
   <div class="more-grid">
+    <a href="avatar-builder.html" class="more-card">
+      <div class="more-card-icon">🧑‍🎨</div>
+      <div class="more-card-info">
+        <div class="more-card-title">Build My Avatar</div>
+        <div class="more-card-sub">Customise your cartoon character</div>
+      </div>
+      <span class="more-chevron">›</span>
+    </a>
     <a href="calendar.html"  class="more-card">
       <div class="more-card-icon">📅</div>
       <div class="more-card-info">
@@ -85,27 +93,18 @@
       </button>
     </div>
   </div>
-
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
-    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
-    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
-    <a href="analysis.html"  class="nav-item">📊<span>Insights</span></a>
+    <a href="dashboard.html" class="nav-item ">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item ">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item ">✨<span>Outfit</span></a>
+    <a href="analysis.html"  class="nav-item ">📊<span>Insights</span></a>
     <a href="more.html"      class="nav-item active">⋯<span>More</span></a>
   </nav>
 
   <script src="../js/data.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../js/ui.js"></script>
   <script src="../js/theme.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const _moreUser = requireAuth();
-      if (_moreUser) initAvatar(_moreUser);
-      const lbl = document.getElementById('theme-label');
-      if (lbl) lbl.textContent = getTheme() === 'dark' ? 'Dark Mode' : 'Light Mode';
-    });
-  </script>
+  <script src="../js/ui.js"></script>
   <script src="../js/avatar.js"></script>
 </body>
 </html>

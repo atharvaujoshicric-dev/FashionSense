@@ -1,29 +1,25 @@
 /* ==========================================
-   OUTFIT.JS — Outfit Suggester Page
+   OUTFIT.JS — Outfit Suggester
    ========================================== */
 
-let currentUser    = null;
+let currentUser     = null;
 let currentOccasion = 'casual';
-let currentCity    = '';
-let currentOutfit  = null;
-let swapSlotRole   = null;
-let pendingBodyPhotoData = null;
+let currentCity     = '';
+let currentOutfit   = null;
+let swapSlotRole    = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
-  initAvatar(currentUser);
+  initPageAvatar(currentUser);
 
   currentCity = currentUser.city || 'Mumbai';
   document.getElementById('outfit-city-label').textContent = currentCity;
   populateCitySelect('city-picker-select', currentCity);
-  loadOutfitWeather();
 
-  // Load and show saved outfits
   renderSavedOutfits();
-
-  // If user already has body photo, show try-on prompt
   refreshTryOnSection(null);
+  loadOutfitWeather();
 });
 
 function selectOccasion(occ, btn) {
@@ -35,14 +31,12 @@ function selectOccasion(occ, btn) {
 // ── Generate ──────────────────────────────────────────────────────────────────
 
 function generateOutfit() {
-  const wardrobe = getWardrobe(currentUser.username);
-
+  const wardrobe = _getWardrobe();
   if (wardrobe.length < 2) {
     document.getElementById('no-wardrobe-warning').classList.remove('hidden');
     document.getElementById('outfit-result').classList.add('hidden');
     return;
   }
-
   document.getElementById('no-wardrobe-warning').classList.add('hidden');
 
   const result = generateOutfitSuggestion(wardrobe, currentUser, currentOccasion, currentCity);
@@ -59,11 +53,11 @@ function renderOutfitResult(result) {
   document.getElementById('outfit-name').textContent = result.outfitName;
   document.getElementById('outfit-desc').textContent = result.outfitDesc;
   document.getElementById('save-outfit-btn').textContent = '🔖 Save Look';
-  // Show share btn
+
   const shareBtn = document.getElementById('share-outfit-btn');
   if (shareBtn) shareBtn.classList.remove('hidden');
 
-  // Try-on
+  // Avatar try-on
   refreshTryOnSection(result.slots);
 
   // Slots
@@ -72,131 +66,71 @@ function renderOutfitResult(result) {
   result.slots.forEach(slot => {
     const el = document.createElement('div');
     el.className = 'outfit-slot';
-
     const imgHtml = slot.item.imageData
       ? `<div class="slot-img"><img src="${slot.item.imageData}" /></div>`
-      : `<div class="slot-img">${getCategoryEmoji(slot.item.category)}</div>`;
-
+      : `<div class="slot-img">${_emoji(slot.item.category)}</div>`;
     el.innerHTML = `
       ${imgHtml}
       <div class="slot-info">
         <div class="slot-category">${slot.label}</div>
         <div class="slot-name">${slot.item.subtype}</div>
-        <div class="slot-color">${cap(slot.item.color)} · ${slot.item.pattern}</div>
+        <div class="slot-color">${_cap(slot.item.color)} · ${slot.item.pattern}</div>
       </div>
-      <button class="slot-swap-btn"
-        onclick="event.stopPropagation(); openSwapModal('${slot.role}')">Swap</button>
-    `;
+      <button class="slot-swap-btn" onclick="openSwapModal('${slot.role}')">Swap</button>`;
     slotsEl.appendChild(el);
   });
 
   // Tips
-  const tipsList = document.getElementById('styling-tips-list');
-  tipsList.innerHTML = '';
-  result.tips.forEach(tip => {
-    const li = document.createElement('li');
-    li.textContent = tip;
-    tipsList.appendChild(li);
-  });
+  document.getElementById('styling-tips-list').innerHTML =
+    result.tips.map(t => `<li>${t}</li>`).join('');
 
   // Palette
-  const swatches = document.getElementById('palette-swatches');
-  swatches.innerHTML = '';
+  const sw = document.getElementById('palette-swatches');
+  sw.innerHTML = '';
   result.palette.hexes.forEach(hex => {
-    const sw = document.createElement('div');
-    sw.className = 'palette-swatch';
-    sw.style.backgroundColor = hex;
-    swatches.appendChild(sw);
+    const d = document.createElement('div');
+    d.className = 'palette-swatch';
+    d.style.backgroundColor = hex;
+    sw.appendChild(d);
   });
   document.getElementById('palette-desc').textContent = result.palette.desc;
 
   resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Avatar Try-On ──────────────────────────────────────────────────────────────
+// ── Avatar try-on ─────────────────────────────────────────────────────────────
 
 async function refreshTryOnSection(slots) {
   const stage  = document.getElementById('outfit-avatar-stage');
   const pieces = document.getElementById('tryon-pieces-col');
   if (!stage) return;
 
-  // Render animated avatar with outfit
-  await renderAvatarWithOutfit(stage, currentUser, slots);
+  await renderAvatarWithOutfit(stage, currentUser, slots || []);
 
-  // Render piece list on the right
-  if (pieces && slots) {
+  if (pieces) {
     pieces.innerHTML = '';
-    slots.forEach(slot => {
-      const row = document.createElement('div');
-      row.className = 'tryon-piece-row';
-      const imgEl = slot.item.imageData
-        ? `<img src="${slot.item.imageData}" class="tryon-piece-thumb" />`
-        : `<div class="tryon-piece-emoji">${_catEmoji(slot.item.category)}</div>`;
-      row.innerHTML = `
-        ${imgEl}
-        <div class="tryon-piece-details">
-          <div class="tryon-piece-cat">${slot.label}</div>
-          <div class="tryon-piece-name">${cap(slot.item.color)} ${slot.item.subtype}</div>
-        </div>`;
-      pieces.appendChild(row);
-    });
+    if (slots && slots.length > 0) {
+      slots.forEach(slot => {
+        const row = document.createElement('div');
+        row.className = 'tryon-piece-row';
+        const img = slot.item.imageData
+          ? `<img src="${slot.item.imageData}" class="tryon-piece-thumb" />`
+          : `<div class="tryon-piece-emoji">${_emoji(slot.item.category)}</div>`;
+        row.innerHTML = `${img}
+          <div class="tryon-piece-details">
+            <div class="tryon-piece-cat">${slot.label}</div>
+            <div class="tryon-piece-name">${_cap(slot.item.color)} ${slot.item.subtype}</div>
+          </div>`;
+        pieces.appendChild(row);
+      });
+    } else {
+      pieces.innerHTML = `<p style="font-size:0.8rem;color:var(--text-muted);padding:0.5rem">
+        Generate an outfit to dress your avatar</p>`;
+    }
   }
 }
 
-function goToProfile() {
-  window.location.href = 'profile.html';
-}
-
-function openBodyPhotoUpload() {
-  // Shows the modal with current photo; user can re-upload via picker inside modal
-  pendingBodyPhotoData = getUserBodyPhoto() || null;
-  const preview     = document.getElementById('body-photo-preview-modal');
-  const placeholder = document.getElementById('body-photo-placeholder-modal');
-  if (pendingBodyPhotoData) {
-    preview.src = pendingBodyPhotoData;
-    preview.classList.remove('hidden');
-    placeholder.style.display = 'none';
-    document.getElementById('save-body-photo-btn').disabled = false;
-  } else {
-    preview.classList.add('hidden');
-    placeholder.style.display = 'flex';
-    document.getElementById('save-body-photo-btn').disabled = true;
-  }
-  document.getElementById('body-photo-modal').classList.remove('hidden');
-}
-
-// Called when user taps the photo area inside the body photo modal
-function openBodyPhotoPickerSheet() {
-  openPhotoPicker(function(dataUrl) {
-    pendingBodyPhotoData = dataUrl;
-    const preview = document.getElementById('body-photo-preview-modal');
-    preview.src   = dataUrl;
-    preview.classList.remove('hidden');
-    document.getElementById('body-photo-placeholder-modal').style.display = 'none';
-    document.getElementById('save-body-photo-btn').disabled = false;
-  }, {
-    title: 'Your Full-Body Photo',
-    hint:  'Stand straight against a plain background. Full length from head to toe works best.'
-  });
-}
-
-function closeBodyPhotoModal() {
-  document.getElementById('body-photo-modal').classList.add('hidden');
-}
-
-function saveBodyPhoto() {
-  if (!pendingBodyPhotoData) return;
-  const updated = updateCurrentUser({ bodyPhoto: pendingBodyPhotoData });
-  // Update local reference
-  if (currentUser) currentUser.bodyPhoto = pendingBodyPhotoData;
-  closeBodyPhotoModal();
-  showToast('Photo saved ✦');
-  // Refresh try-on
-  if (currentOutfit) refreshTryOnSection(currentOutfit.slots);
-  else refreshTryOnSection(null);
-}
-
-// ── Save Outfits ──────────────────────────────────────────────────────────────
+// ── Save outfits ──────────────────────────────────────────────────────────────
 
 function saveCurrentOutfit() {
   if (!currentOutfit) return;
@@ -205,54 +139,46 @@ function saveCurrentOutfit() {
   try { saved = JSON.parse(localStorage.getItem(key)) || []; } catch {}
 
   const entry = {
-    id:        Date.now().toString(),
-    name:      currentOutfit.outfitName,
-    occasion:  currentOccasion,
-    slots:     currentOutfit.slots.map(s => ({ role: s.role, label: s.label, item: s.item })),
-    savedAt:   Date.now()
+    id:       String(Date.now()),
+    name:     currentOutfit.outfitName,
+    occasion: currentOccasion,
+    slots:    currentOutfit.slots.map(s => ({ role:s.role, label:s.label, item:s.item })),
+    savedAt:  Date.now()
   };
-
   saved.unshift(entry);
   if (saved.length > 20) saved = saved.slice(0, 20);
-  localStorage.setItem(key, JSON.stringify(saved));
+  try { localStorage.setItem(key, JSON.stringify(saved)); } catch {}
 
   document.getElementById('save-outfit-btn').textContent = '✓ Saved!';
-  showToast('Look saved to your collection ✦');
+  showToast('Look saved ✦');
   renderSavedOutfits();
 }
 
 function renderSavedOutfits() {
-  const key = 'styleai_saved_outfits_' + currentUser?.username;
-  let saved = [];
+  const key   = 'styleai_saved_outfits_' + currentUser?.username;
+  let saved   = [];
   try { saved = JSON.parse(localStorage.getItem(key)) || []; } catch {}
+  const sec   = document.getElementById('saved-section');
+  const list  = document.getElementById('saved-outfits-list');
+  if (!sec || !list) return;
+  if (saved.length === 0) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
 
-  const section = document.getElementById('saved-section');
-  const list    = document.getElementById('saved-outfits-list');
-
-  if (saved.length === 0) { section.classList.add('hidden'); return; }
-  section.classList.remove('hidden');
-
-  list.innerHTML = '';
-  saved.forEach(entry => {
-    const card = document.createElement('div');
-    card.className = 'saved-outfit-card';
-
-    const thumbs = entry.slots.slice(0, 3).map(s =>
-      s.item.imageData
+  list.innerHTML = saved.map(e => {
+    const thumbs = e.slots.slice(0,3).map(s =>
+      s.item?.imageData
         ? `<img src="${s.item.imageData}" class="saved-thumb" />`
-        : `<div class="saved-thumb-emoji">${getCategoryEmoji(s.item.category)}</div>`
+        : `<div class="saved-thumb-emoji">${_emoji(s.item?.category)}</div>`
     ).join('');
-
-    card.innerHTML = `
+    return `<div class="saved-outfit-card">
       <div class="saved-thumbs">${thumbs}</div>
       <div class="saved-info">
-        <div class="saved-name">${entry.name}</div>
-        <div class="saved-occ">${cap(entry.occasion)} · ${new Date(entry.savedAt).toLocaleDateString()}</div>
+        <div class="saved-name">${e.name}</div>
+        <div class="saved-occ">${_cap(e.occasion)} · ${new Date(e.savedAt).toLocaleDateString()}</div>
       </div>
-      <button class="saved-delete" onclick="deleteSavedOutfit('${entry.id}')">✕</button>
-    `;
-    list.appendChild(card);
-  });
+      <button class="saved-delete" onclick="deleteSavedOutfit('${e.id}')">✕</button>
+    </div>`;
+  }).join('');
 }
 
 function deleteSavedOutfit(id) {
@@ -260,7 +186,7 @@ function deleteSavedOutfit(id) {
   let saved = [];
   try { saved = JSON.parse(localStorage.getItem(key)) || []; } catch {}
   saved = saved.filter(s => s.id !== id);
-  localStorage.setItem(key, JSON.stringify(saved));
+  try { localStorage.setItem(key, JSON.stringify(saved)); } catch {}
   renderSavedOutfits();
 }
 
@@ -273,41 +199,28 @@ function clearSavedOutfits() {
 // ── Swap ──────────────────────────────────────────────────────────────────────
 
 function openSwapModal(role) {
-  swapSlotRole = role;
-  const roleCatMap = {
-    top:       ['tops','ethnic'],
-    bottom:    ['bottoms','ethnic'],
-    outerwear: ['outerwear'],
-    footwear:  ['footwear'],
-    accessory: ['accessories']
-  };
+  swapSlotRole  = role;
+  const cats    = { top:['tops','ethnic'], bottom:['bottoms','ethnic'], outerwear:['outerwear'], footwear:['footwear'], accessory:['accessories'] };
+  const options = _getWardrobe().filter(i => (cats[role]||['tops']).includes(i.category));
 
-  const allowed  = roleCatMap[role] || ['tops'];
-  const wardrobe = getWardrobe(currentUser.username);
-  const options  = wardrobe.filter(i => allowed.includes(i.category));
-
-  document.getElementById('swap-modal-title').textContent = `Swap ${cap(role)}`;
+  document.getElementById('swap-modal-title').textContent = 'Swap ' + _cap(role);
   const grid = document.getElementById('swap-grid');
   grid.innerHTML = '';
 
-  if (options.length === 0) {
+  if (!options.length) {
     grid.innerHTML = '<p style="color:var(--text-muted);padding:1rem;grid-column:1/-1">No items in this category</p>';
   } else {
     options.forEach(item => {
-      const el  = document.createElement('div');
+      const el = document.createElement('div');
       el.className = 'swap-item';
-      el.onclick   = () => swapItem(item);
-
-      const cur = currentOutfit?.slots.find(s => s.role === role);
-      if (cur?.item.id === item.id) el.classList.add('selected');
-
+      if (currentOutfit?.slots.find(s => s.role===role)?.item.id === item.id) el.classList.add('selected');
+      el.onclick = () => swapItem(item);
       el.innerHTML = item.imageData
         ? `<img src="${item.imageData}" />`
-        : `<span>${getCategoryEmoji(item.category)}</span><small>${item.color}</small>`;
+        : `<span style="font-size:1.8rem">${_emoji(item.category)}</span>`;
       grid.appendChild(el);
     });
   }
-
   document.getElementById('swap-modal').classList.remove('hidden');
 }
 
@@ -319,10 +232,7 @@ function closeSwapModal() {
 function swapItem(newItem) {
   if (!swapSlotRole || !currentOutfit) return;
   const slot = currentOutfit.slots.find(s => s.role === swapSlotRole);
-  if (slot) {
-    slot.item = newItem;
-    currentOutfit.palette = buildPalette(currentOutfit.slots);
-  }
+  if (slot) { slot.item = newItem; currentOutfit.palette = buildPalette(currentOutfit.slots); }
   closeSwapModal();
   renderOutfitResult(currentOutfit);
   showToast('Outfit updated ✦');
@@ -337,44 +247,41 @@ function applyCity() {
   currentCity = document.getElementById('city-picker-select').value;
   document.getElementById('outfit-city-label').textContent = currentCity;
   closeCityModal();
-  showToast(`City set to ${currentCity}`);
+  loadOutfitWeather();
+  showToast('City set to ' + currentCity);
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Weather ───────────────────────────────────────────────────────────────────
 
-function getCategoryEmoji(cat) {
-  return { tops:'👕', bottoms:'👖', outerwear:'🧥', footwear:'👟', accessories:'⌚', ethnic:'🥻' }[cat] || '👗';
-}
-
-function cap(str) {
-  if (!str) return '';
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function getWardrobe(username) {
-  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_' + username)) || []; }
-  catch { return []; }
-}
-
-// ── Share card ────────────────────────────────────────────────────────────────
-function shareCurrentOutfit() {
-  if (!currentOutfit || !currentUser) return;
-  showShareCard(currentOutfit, currentUser.username);
-}
-
-// ── Weather advisory in outfit ────────────────────────────────────────────────
 async function loadOutfitWeather() {
   const el = document.getElementById('outfit-weather-bar');
   if (!el) return;
   try {
     const w = await fetchWeather(currentCity);
     const cat = getTempCategory(w.temp);
-    el.innerHTML = `
-      <div class="outfit-weather-inner">
-        <span class="outfit-weather-temp">${w.temp}${w.unit} ${w.description.split(' ').pop()}</span>
-        <span class="outfit-weather-advice">${w.advice[0]}</span>
-      </div>`;
+    el.innerHTML = `<div class="outfit-weather-inner">
+      <span class="outfit-weather-temp">${w.temp}${w.unit} ${w.description.split(' ').pop()}</span>
+      <span class="outfit-weather-advice">${w.advice[0]}</span>
+    </div>`;
     el.className = 'outfit-weather-bar weather-' + cat;
     el.classList.remove('hidden');
   } catch {}
+}
+
+// ── Share ─────────────────────────────────────────────────────────────────────
+
+function shareCurrentOutfit() {
+  if (!currentOutfit || !currentUser) return;
+  showShareCard(currentOutfit, currentUser.username);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function _emoji(cat) {
+  return {tops:'👕',bottoms:'👖',outerwear:'🧥',footwear:'👟',accessories:'⌚',ethnic:'🥻'}[cat]||'👗';
+}
+function _cap(s) { return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+function _getWardrobe() {
+  try { return JSON.parse(localStorage.getItem('styleai_wardrobe_'+currentUser.username))||[]; }
+  catch { return []; }
 }

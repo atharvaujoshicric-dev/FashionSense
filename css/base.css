@@ -715,3 +715,160 @@ select option {
     radial-gradient(ellipse at 20% 50%, rgba(154,111,48,0.10) 0%, transparent 60%),
     linear-gradient(180deg, #f5f3ef 0%, #ede9e3 100%);
 }
+
+/* ==========================================
+   MOBILE LAYOUT FIXES
+   ========================================== */
+
+/* Prevent any horizontal overflow */
+html, body { max-width: 100%; overflow-x: hidden; }
+
+/* All fixed/sticky elements must not cause overflow */
+.topbar, .bottom-nav, .category-tabs, .occasion-bar {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Scrollable horizontal bars — hide scrollbar but allow scroll */
+.category-tabs, .occasion-bar, .trend-scroll,
+.cal-saved-scroll, .wgwt-items, .ab-swatch-row, .ab-style-row {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overflow-x: auto;
+}
+.category-tabs::-webkit-scrollbar,
+.occasion-bar::-webkit-scrollbar { display: none; }
+
+/* Ensure modals don't overflow */
+.modal-sheet {
+  max-height: 92vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix form inputs on iOS — prevent zoom on focus */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+  font-size: 16px !important; /* prevents iOS zoom */
+  -webkit-appearance: none;
+}
+
+/* Pill groups wrapping on small screens */
+.pill-group { flex-wrap: wrap; }
+
+/* Touch targets min 44px */
+.pill        { min-height: 38px; display: flex; align-items: center; }
+.cat-tab     { min-height: 38px; display: flex; align-items: center; }
+.occ-btn     { min-height: 38px; }
+.btn-primary,
+.btn-ghost,
+.btn-secondary { min-height: 48px; }
+
+/* Bottom nav safe area */
+.bottom-nav {
+  padding-bottom: max(var(--safe-bottom), 8px);
+}
+
+/* Page content padding — account for both topbar and bottom nav */
+body > *:not(.topbar):not(.bottom-nav):not(.modal-overlay):not(#onboarding-overlay):not(#_gpp):not(#share-card-modal) {
+  /* don't apply globally — too broad */
+}
+
+/* Specifically fix last section before nav */
+.section-block:last-of-type,
+.shop-grid,
+.wardrobe-grid,
+.pack-form-card ~ div {
+  padding-bottom: calc(var(--nav-height) + 1.5rem);
+}
+
+/* Fix wardrobe grid — 3 cols only if screen wide enough */
+@media (max-width: 360px) {
+  .wardrobe-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Fix shop grid on very small screens */
+@media (max-width: 360px) {
+  .shop-grid { grid-template-columns: 1fr; }
+}
+
+/* Calendar cells on small screens */
+@media (max-width: 360px) {
+  .cal-date-num { font-size: 0.65rem; }
+}
+
+/* Outfit slot layout */
+.outfit-slot {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+/* Ensure topbar doesn't overlap content */
+body { padding-top: 0; }
+
+/* Fix action cards text overflow */
+.action-info h3, .action-info p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hair cards on mobile */
+.face-shape-grid {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+}
+
+@media (max-width: 380px) {
+  .face-card { padding: 0.5rem 0.1rem 0.4rem; font-size: 0.6rem; }
+  .face-svg  { width: 28px; height: 36px; }
+}
+
+/* Score card responsive */
+@media (max-width: 380px) {
+  .score-card { flex-direction: column; align-items: center; }
+  .score-ring-wrap { margin-bottom: 0.5rem; }
+}
+
+/* Occasion coverage grid */
+.occ-cover-grid { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 340px) {
+  .occ-cover-grid { grid-template-columns: 1fr; }
+}
+
+/* Tryon avatar section */
+.tryon-avatar-body {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 360px) {
+  .tryon-avatar-col { flex: 0 0 100%; max-width: 100%; }
+  .tryon-pieces-col { flex: 0 0 100%; }
+}
+
+/* More page grid */
+.more-grid { gap: 0.4rem; }
+
+/* Prevent text selection on tap (buttons/interactive) */
+button, .cal-cell, .wardrobe-item, .shop-card,
+.action-card, .more-card, .nav-item {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Active states for touch */
+.action-card:active  { transform: scale(0.98); }
+.more-card:active    { transform: scale(0.98); }
+.nav-item:active     { opacity: 0.7; }
+
+/* Fix iOS elastic scroll */
+body { -webkit-overflow-scrolling: touch; }
+
+/* ── Topbar avatar (profile photo ring) ── */
+.topbar-avatar {
+  -webkit-tap-highlight-color: transparent;
+}

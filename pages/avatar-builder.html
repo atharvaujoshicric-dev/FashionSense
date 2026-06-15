@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>StyleAI — Build Your Avatar</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/app.css" />
+  <link rel="stylesheet" href="../css/avatar.css" />
+  <link rel="stylesheet" href="../css/avatar-builder.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="profile.html" class="back-link">←</a>
+      <span class="topbar-title">Build Your Avatar</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-primary" style="padding:0.5rem 1rem;font-size:0.85rem" onclick="saveAvatar()">Save ✦</button>
+    </div>
+  </header>
+
+  <!-- Sticky preview -->
+  <div class="ab-preview-bar">
+    <div class="avatar-stage" id="ab-preview-stage" style="max-width:120px;max-height:204px">
+      <div class="avatar-loading"><div class="avatar-loading-fig">🧍</div></div>
+    </div>
+    <div class="ab-preview-info">
+      <p class="ab-preview-title">Your Avatar</p>
+      <p class="ab-preview-sub">Updates live as you customise</p>
+    </div>
+  </div>
+
+  <div class="ab-sections">
+
+    <!-- Skin tone -->
+    <div class="ab-section">
+      <div class="ab-section-title">🎨 Skin Tone</div>
+      <div class="ab-swatch-row" id="ab-skin-tones"></div>
+    </div>
+
+    <!-- Hair colour -->
+    <div class="ab-section">
+      <div class="ab-section-title">💇 Hair Colour</div>
+      <div class="ab-swatch-row" id="ab-hair-colors"></div>
+    </div>
+
+    <!-- Hair style -->
+    <div class="ab-section">
+      <div class="ab-section-title">✂️ Hair Style</div>
+      <div class="ab-style-row" id="ab-hair-styles"></div>
+    </div>
+
+    <!-- Top colour -->
+    <div class="ab-section">
+      <div class="ab-section-title">👕 Top Colour</div>
+      <div class="ab-swatch-row" id="ab-top-colors"></div>
+    </div>
+
+    <!-- Bottom colour -->
+    <div class="ab-section">
+      <div class="ab-section-title">👖 Bottom Colour</div>
+      <div class="ab-swatch-row" id="ab-bottom-colors"></div>
+    </div>
+
+    <!-- Shoe colour -->
+    <div class="ab-section">
+      <div class="ab-section-title">👟 Shoe Colour</div>
+      <div class="ab-swatch-row" id="ab-shoe-colors"></div>
+    </div>
+
+    <!-- Accessories -->
+    <div class="ab-section">
+      <div class="ab-section-title">✨ Accessories</div>
+      <div class="ab-acc-row">
+        <button type="button" class="ab-acc-btn" id="ab-acc-glasses">
+          <span>🕶️</span><span>Glasses</span>
+        </button>
+        <button type="button" class="ab-acc-btn" id="ab-acc-watch">
+          <span>⌚</span><span>Watch</span>
+        </button>
+        <button type="button" class="ab-acc-btn" id="ab-acc-belt">
+          <span>🩱</span><span>Belt</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="padding:0 1rem 6rem">
+    <button type="button" class="btn-primary full" onclick="saveAvatar()">Save Avatar ✦</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠<span>Home</span></a>
+    <a href="wardrobe.html"  class="nav-item">👕<span>Wardrobe</span></a>
+    <a href="outfit.html"    class="nav-item">✨<span>Outfit</span></a>
+    <a href="analysis.html"  class="nav-item">📊<span>Insights</span></a>
+    <a href="more.html"      class="nav-item active">⋯<span>More</span></a>
+  </nav>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/theme.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/avatar.js"></script>
+  <script src="../js/avatar-builder.js"></script>
+</body>
+</html>
