@@ -10,7 +10,7 @@ let _calYear   = 0;
 let _calMonth  = 0;
 let _calSelDay = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   _calUser  = requireAuth();
   if (!_calUser) return;
   initAvatar(_calUser);

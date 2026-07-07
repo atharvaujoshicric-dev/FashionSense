@@ -6,7 +6,7 @@ let _pUser        = null;
 let _pPhoto       = null;   // pending body photo
 let _pProfilePhoto= null;   // pending profile photo
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   _pUser = requireAuth();
   if (!_pUser) return;
 

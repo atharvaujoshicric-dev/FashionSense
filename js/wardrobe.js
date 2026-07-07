@@ -9,7 +9,7 @@ let _wItemId    = null;
 let _wPhoto     = null;   // base64 of pending clothing photo
 let _wColor     = '';     // selected color name
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   _wUser  = requireAuth();
   if (!_wUser) return;
   initAvatar(_wUser);

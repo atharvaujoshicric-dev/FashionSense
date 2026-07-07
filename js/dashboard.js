@@ -4,7 +4,7 @@
 
 let _dashUser = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('cloud-ready', async () => {
   _dashUser = requireAuth();
   if (!_dashUser) return;
   initAvatar(_dashUser);

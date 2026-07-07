@@ -9,8 +9,8 @@
    See SETUP.md for the full step-by-step.
    ========================================== */
 
-const SUPABASE_URL = 'https://kbjdfojyydatsqmrrnnf.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiamRmb2p5eWRhdHNxbXJybm5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MTUzNDYsImV4cCI6MjA5ODk5MTM0Nn0.LQPinoL7kXF52i-8TdC68_zrv8Q9MjA3yqQprfuBouE';
+const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
 
 window.__supabaseConfigured = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.includes('YOUR-ANON');
 

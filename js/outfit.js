@@ -8,7 +8,7 @@ let currentCity     = '';
 let currentOutfit   = null;
 let swapSlotRole    = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
   initPageAvatar(currentUser);

@@ -55,7 +55,7 @@ const OUTFIT_COLORS = [
   '#E8A0B0','#A0C4E8','#A0E8C4','#E8C4A0','#C4A0E8','#E8E0A0',
 ];
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   AB.user = requireAuth();
   if (!AB.user) return;
   initPageAvatar(AB.user);

@@ -5,7 +5,7 @@
 let currentUser = null;
 let selectedFaceShape = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
   initAvatar(currentUser);

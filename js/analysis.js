@@ -4,7 +4,7 @@
 
 let _aUser = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   _aUser = requireAuth();
   if (!_aUser) return;
   initAvatar(_aUser);

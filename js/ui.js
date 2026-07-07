@@ -66,17 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ── Auto-init avatar on every page ───────────────────────────────────────────
 // initPageAvatar is defined in avatar.js — sets topbar mini photo
-document.addEventListener('DOMContentLoaded', function() {
-  // Slight delay to ensure auth.js has seeded demo account
-  setTimeout(function() {
-    const user = getCurrentUser();
-    if (user && typeof initPageAvatar === 'function') {
-      initPageAvatar(user);
-      // Set initials fallback
-      const initEl = document.getElementById('topbar-avatar-initials');
-      if (initEl && !user.profilePhoto) {
-        initEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : '?';
-      }
+window.addEventListener('cloud-ready', function() {
+  const user = getCurrentUser();
+  if (user && typeof initPageAvatar === 'function') {
+    initPageAvatar(user);
+    // Set initials fallback
+    const initEl = document.getElementById('topbar-avatar-initials');
+    if (initEl && !user.profilePhoto) {
+      initEl.textContent = user.name ? user.name.charAt(0).toUpperCase() : '?';
     }
-  }, 50);
+  }
 });

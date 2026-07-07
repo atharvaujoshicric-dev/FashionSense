@@ -7,7 +7,7 @@ let allShopItems     = [];
 let currentFilter    = 'all';
 let currentShopItem  = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('cloud-ready', () => {
   currentUser = requireAuth();
   if (!currentUser) return;
   initAvatar(currentUser);
