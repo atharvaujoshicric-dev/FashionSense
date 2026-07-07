@@ -71,25 +71,40 @@ async function updateCurrentUser(updates) {
 
 // ── Auth handlers ─────────────────────────────────────────────────────────────
 
+function _supabaseReady(errEl) {
+  if (!window.supabaseClient) {
+    showAuthError(errEl, 'Could not connect (Supabase failed to load). Check your internet connection, disable any ad-blocker for this site, and refresh the page.');
+    return false;
+  }
+  return true;
+}
+
 async function handleLogin() {
   const username = (document.getElementById('login-username')?.value || '').trim().toLowerCase();
   const password = (document.getElementById('login-password')?.value || '');
   const errEl    = document.getElementById('login-error');
 
   if (!username || !password) { showAuthError(errEl, 'Please fill in all fields.'); return; }
+  if (!_supabaseReady(errEl)) return;
 
-  const { error } = await window.supabaseClient.auth.signInWithPassword({
-    email: _emailForUsername(username), password,
-  });
-  if (error) {
-    const msg = /confirm/i.test(error.message)
-      ? 'This account needs email confirmation turned off — in Supabase go to Authentication → Providers → Email and disable "Confirm email".'
-      : 'Invalid username or password.';
-    showAuthError(errEl, msg);
-    return;
+  try {
+    const { error } = await window.supabaseClient.auth.signInWithPassword({
+      email: _emailForUsername(username), password,
+    });
+    if (error) {
+      const msg = /confirm/i.test(error.message)
+        ? 'This account needs email confirmation turned off — in Supabase go to Authentication → Providers → Email and disable "Confirm email".'
+        : /fetch|network/i.test(error.message)
+          ? 'Could not reach the server. Check your internet connection and try again.'
+          : 'Invalid username or password.';
+      showAuthError(errEl, msg);
+      return;
+    }
+    window.location.href = 'pages/dashboard.html';
+  } catch (e) {
+    console.error('handleLogin failed:', e);
+    showAuthError(errEl, 'Unexpected error: ' + (e?.message || e));
   }
-
-  window.location.href = 'pages/dashboard.html';
 }
 
 async function handleRegister() {
@@ -110,57 +125,72 @@ async function handleRegister() {
   if (password.length < 6) { showAuthError(errEl, 'Password must be at least 6 characters.'); return; }
   if (!gender)             { showAuthError(errEl, 'Please select your gender.');            return; }
   if (username === 'demo') { showAuthError(errEl, '"demo" is reserved. Pick another.'); return; }
+  if (!_supabaseReady(errEl)) return;
 
-  const { data, error } = await window.supabaseClient.auth.signUp({
-    email: _emailForUsername(username),
-    password,
-    options: {
-      data: {
-        username, name, city, gender,
-        bodyType: bodyType || 'average',
-        faceShape: faceShape || 'oval',
-        isDemo: false,
-      },
-    },
-  });
-
-  if (error) {
-    const msg = /registered|exists/i.test(error.message) ? 'Username already taken.' : error.message;
-    showAuthError(errEl, msg);
-    return;
-  }
-
-  if (!data.session) {
-    showAuthError(errEl, 'Account created, but sign-in didn\u2019t start automatically. In Supabase go to Authentication → Providers → Email and turn OFF "Confirm email", then try logging in.');
-    return;
-  }
-
-  window.location.href = 'pages/dashboard.html';
-}
-
-async function loginAsDemo() {
-  const email = _emailForUsername('demo');
-  let { error } = await window.supabaseClient.auth.signInWithPassword({ email, password: 'demo123' });
-
-  if (error) {
-    // First time — seed the demo account, then log in.
-    const signUp = await window.supabaseClient.auth.signUp({
-      email, password: 'demo123',
+  try {
+    const { data, error } = await window.supabaseClient.auth.signUp({
+      email: _emailForUsername(username),
+      password,
       options: {
         data: {
-          username: 'demo', name: 'Demo User', city: 'Mumbai',
-          gender: 'male', bodyType: 'athletic', faceShape: 'oval', isDemo: true,
+          username, name, city, gender,
+          bodyType: bodyType || 'average',
+          faceShape: faceShape || 'oval',
+          isDemo: false,
         },
       },
     });
-    if (signUp.error) { alert('Demo account is unavailable right now. Please try again shortly.'); return; }
-    if (!signUp.data.session) {
-      alert('Demo account created, but sign-in didn\u2019t start automatically. In Supabase go to Authentication → Providers → Email and turn OFF "Confirm email", then tap Demo Login again.');
+
+    if (error) {
+      const msg = /registered|exists/i.test(error.message) ? 'Username already taken.' : error.message;
+      showAuthError(errEl, msg);
       return;
     }
-  }
 
-  window.location.href = 'pages/dashboard.html';
+    if (!data.session) {
+      showAuthError(errEl, 'Account created, but sign-in didn\u2019t start automatically. In Supabase go to Authentication → Providers → Email and turn OFF "Confirm email", then try logging in.');
+      return;
+    }
+
+    window.location.href = 'pages/dashboard.html';
+  } catch (e) {
+    console.error('handleRegister failed:', e);
+    showAuthError(errEl, 'Unexpected error: ' + (e?.message || e));
+  }
+}
+
+async function loginAsDemo() {
+  if (!window.supabaseClient) {
+    alert('Could not connect (Supabase failed to load). Check your internet connection, disable any ad-blocker for this site, and refresh the page.');
+    return;
+  }
+  try {
+    const email = _emailForUsername('demo');
+    let { error } = await window.supabaseClient.auth.signInWithPassword({ email, password: 'demo123' });
+
+    if (error) {
+      // First time — seed the demo account, then log in.
+      const signUp = await window.supabaseClient.auth.signUp({
+        email, password: 'demo123',
+        options: {
+          data: {
+            username: 'demo', name: 'Demo User', city: 'Mumbai',
+            gender: 'male', bodyType: 'athletic', faceShape: 'oval', isDemo: true,
+          },
+        },
+      });
+      if (signUp.error) { alert('Demo account is unavailable right now: ' + signUp.error.message); return; }
+      if (!signUp.data.session) {
+        alert('Demo account created, but sign-in didn\u2019t start automatically. In Supabase go to Authentication → Providers → Email and turn OFF "Confirm email", then tap Demo Login again.');
+        return;
+      }
+    }
+
+    window.location.href = 'pages/dashboard.html';
+  } catch (e) {
+    console.error('loginAsDemo failed:', e);
+    alert('Unexpected error: ' + (e?.message || e));
+  }
 }
 
 async function logout() {
