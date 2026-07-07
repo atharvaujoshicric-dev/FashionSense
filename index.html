@@ -1,145 +1,1082 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>StyleAI — Your Personal Fashion Designer</title>
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/auth.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>StyleAI — Your Digital Wardrobe</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS — graphite neutrals + indigo accent
+   System fonts only — zero network dependency, zero risk of a
+   CDN/font failure breaking the page on GitHub Pages.
+   ============================================================ */
+:root{
+  --bg:#15171c; --bg-card:#1e2129; --bg-elevated:#262a33; --bg-input:#262a33;
+  --border:#333844; --border-light:#444a58;
+  --text:#f2f3f5; --text-2:#a3a8b4; --text-3:#6b7280;
+  --accent:#4f63d2; --accent-light:#7186e6; --accent-dim:rgba(79,99,210,.15); --on-accent:#fbfbfe;
+  --red:#e5484d; --red-dim:rgba(229,72,77,.15);
+  --green:#4caf7d; --green-dim:rgba(76,175,125,.15);
+  --radius-sm:10px; --radius:16px; --radius-lg:22px;
+  --nav-h:64px; --top-h:56px;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+[data-theme="light"]{
+  --bg:#f7f7f9; --bg-card:#ffffff; --bg-elevated:#eef0f4; --bg-input:#e4e7ec;
+  --border:#dfe2e8; --border-light:#c9ced8;
+  --text:#14161a; --text-2:#565b66; --text-3:#8b909b;
+  --accent:#3a4dc0; --accent-light:#5266d6; --accent-dim:rgba(58,77,192,.12); --on-accent:#fbfbfe;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased; -webkit-overflow-scrolling:touch;
+}
+img{max-width:100%;display:block}
+button{font-family:inherit;cursor:pointer;-webkit-user-select:none;user-select:none}
+input,select,textarea{font-family:inherit;font-size:16px}
+a{color:var(--accent);text-decoration:none}
+::selection{background:var(--accent);color:#fff}
+
+/* phone-frame on wide viewports */
+@media (min-width:541px){
+  body{max-width:480px;margin:0 auto;min-height:100vh;border-left:1px solid var(--border);border-right:1px solid var(--border)}
+  .fixed-frame{left:50% !important;right:auto !important;width:480px;max-width:100vw;transform:translateX(-50%)}
+}
+
+.hidden{display:none !important}
+
+/* ---------- Auth screen ---------- */
+#auth{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:2rem 1.5rem; text-align:center; gap:1.75rem;
+  background:
+    radial-gradient(ellipse at 20% 20%, var(--accent-dim) 0%, transparent 55%),
+    var(--bg);
+}
+.logo{font-size:2rem;font-weight:700;letter-spacing:-.02em}
+.logo-sub{color:var(--text-2);font-size:.85rem;margin-top:.3rem}
+.auth-card{width:100%;max-width:340px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:left;display:flex;flex-direction:column;gap:.85rem}
+.auth-tabs{display:flex;gap:.4rem;margin-bottom:.4rem}
+.auth-tab{flex:1;padding:.55rem 0;border-radius:999px;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-2);font-weight:600;font-size:.85rem;text-align:center}
+.auth-tab.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.field label{font-size:.75rem;color:var(--text-2);display:block;margin-bottom:.3rem;font-weight:600}
+.field input,.field select{width:100%;padding:.65rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-input);color:var(--text)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.err{font-size:.78rem;color:var(--red);min-height:1em}
+.btn-primary{width:100%;background:var(--accent);color:var(--on-accent);border:none;border-radius:var(--radius-sm);padding:.75rem;font-weight:700;font-size:.92rem}
+.btn-primary:active{opacity:.85}
+.btn-ghost{width:100%;background:transparent;color:var(--text-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem;font-weight:600;font-size:.88rem}
+.btn-danger{width:100%;background:var(--red-dim);color:var(--red);border:none;border-radius:var(--radius-sm);padding:.7rem;font-weight:700}
+.divider{display:flex;align-items:center;gap:.6rem;color:var(--text-3);font-size:.75rem;margin:.2rem 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ---------- App shell ---------- */
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.show{display:flex}
+.topbar{
+  position:sticky; top:0; z-index:50; height:calc(var(--top-h) + var(--safe-t)); padding-top:var(--safe-t);
+  display:flex;align-items:center;justify-content:space-between;padding-left:1rem;padding-right:1rem;
+  background:rgba(21,23,28,.9); backdrop-filter:blur(10px); border-bottom:1px solid var(--border);
+}
+[data-theme="light"] .topbar{background:rgba(247,247,249,.92)}
+.topbar-title{font-weight:700;font-size:1.05rem}
+.icon-btn{width:36px;height:36px;border-radius:999px;background:var(--bg-elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text)}
+main{flex:1;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 1rem);overflow-x:hidden}
+.panel{display:none;padding:1rem}
+.panel.active{display:block}
+
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;height:calc(var(--nav-h) + var(--safe-b));padding-bottom:var(--safe-b);
+  display:flex;align-items:center;justify-content:space-around;background:rgba(21,23,28,.95);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+}
+[data-theme="light"] .bottom-nav{background:rgba(255,255,255,.95)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.15rem;color:var(--text-3);font-size:.65rem;font-weight:600;flex:1;padding:.3rem 0}
+.nav-item .ic{font-size:1.25rem}
+.nav-item.active{color:var(--accent)}
+
+/* ---------- Wardrobe ---------- */
+.cats{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:.75rem}
+.cats::-webkit-scrollbar{display:none}
+.cat-chip{white-space:nowrap;padding:.5rem 1rem;border-radius:999px;border:1px solid var(--border);background:var(--bg-card);font-size:.8rem;font-weight:600;color:var(--text-2)}
+.cat-chip.active{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+.item-card{aspect-ratio:3/4;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative}
+.item-card img{width:100%;height:100%;object-fit:cover}
+.item-card .badge{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);color:#fff;font-size:.62rem;padding:.5rem .4rem .3rem;text-transform:capitalize}
+.add-tile{aspect-ratio:3/4;border:2px dashed var(--border);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;color:var(--text-3);font-size:.78rem;font-weight:600}
+.empty{text-align:center;padding:3rem 1rem;color:var(--text-3)}
+.empty .ic{font-size:2.2rem;margin-bottom:.5rem}
+
+/* ---------- Modals ---------- */
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;backdrop-filter:blur(2px)}
+.sheet{background:var(--bg-card);width:100%;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:1.1rem 1.2rem calc(1.6rem + var(--safe-b))}
+.sheet-handle{width:38px;height:4px;background:var(--border);border-radius:99px;margin:0 auto 1rem}
+.sheet-title{font-weight:700;font-size:1.05rem;margin-bottom:.9rem}
+.photo-box{aspect-ratio:4/3;border:2px dashed var(--border);border-radius:var(--radius);background:var(--bg-input);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:.9rem}
+.photo-box img{width:100%;height:100%;object-fit:cover}
+.photo-ph{display:flex;flex-direction:column;align-items:center;gap:.4rem;color:var(--text-3);font-size:.82rem}
+.photo-ph .ic{font-size:2rem}
+.swatches{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;flex-shrink:0}
+.swatch.selected{border-color:var(--accent);transform:scale(1.12)}
+.detect-banner{margin-top:.5rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem .8rem;font-size:.8rem;color:var(--text-2);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:inline-block;border:1px solid var(--border)}
+
+/* ---------- Try-on stage ---------- */
+.stage-frame{border-radius:22px;padding:8px;background:linear-gradient(180deg,var(--bg-elevated),var(--border));margin-bottom:.9rem}
+.stage{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;background:var(--bg-elevated)}
+.stage-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;color:var(--text-3);text-align:center;padding:0 2rem}
+.layer{position:absolute;transform:translate(-50%,-50%);cursor:grab;touch-action:none}
+.layer img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.3))}
+.layer.sel{outline:2px dashed var(--accent);outline-offset:6px;border-radius:6px}
+.stage-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:.7rem .9rem;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.9rem}
+.ctrl-row{display:flex;align-items:center;gap:.6rem}
+.ctrl-row input[type=range]{flex:1;accent-color:var(--accent)}
+.strip{display:flex;gap:.6rem;overflow-x:auto;padding-bottom:.4rem}
+.strip-item{flex-shrink:0;width:64px;aspect-ratio:3/4;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);overflow:hidden;position:relative}
+.strip-item img{width:100%;height:100%;object-fit:cover}
+.strip-item.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.strip-item .chk{position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:999px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-size:.6rem}
+
+/* ---------- Saved / suggestions ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.outfit-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.outfit-card img{width:100%;aspect-ratio:3/4;object-fit:cover}
+.outfit-card .meta{padding:.55rem .6rem;display:flex;align-items:center;justify-content:space-between;font-size:.78rem}
+
+/* ---------- Profile ---------- */
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border)}
+.profile-row:last-child{border-bottom:none}
+.pill-toggle{display:flex;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.pill-toggle button{padding:.4rem .9rem;background:var(--bg-card);color:var(--text-2);border:none;font-size:.78rem;font-weight:600}
+.pill-toggle button.active{background:var(--accent);color:var(--on-accent)}
+
+/* ---------- misc ---------- */
+.toast{position:fixed;top:calc(var(--safe-t) + 14px);left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.55rem 1rem;border-radius:999px;font-size:.82rem;font-weight:600;z-index:999;max-width:88%;text-align:center}
+.section-title{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin:1.1rem 0 .5rem}
+.fab-row{display:flex;gap:.6rem;margin-top:.9rem}
+.btn-sm{flex:1;padding:.65rem 0;border-radius:999px;border:1px solid var(--border);background:var(--bg-card);font-weight:700;font-size:.82rem;color:var(--text)}
+.btn-sm.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+</style>
 </head>
-<body class="auth-page">
+<body>
 
-  <!-- SPLASH -->
-  <div id="splash-screen" class="screen active">
-    <div class="splash-bg"></div>
-    <div class="splash-content">
-      <div class="logo-wrap">
-        <span class="logo-icon">✦</span>
-        <h1 class="logo-text">StyleAI</h1>
-        <p class="logo-sub">Your world-class fashion designer</p>
-      </div>
-      <div class="splash-actions">
-        <button class="btn-primary" onclick="showScreen('login-screen')">Sign In</button>
-        <button class="btn-ghost" onclick="showScreen('register-screen')">Create Account</button>
-        <div class="demo-divider"><span>or try instantly</span></div>
-        <button class="btn-demo" onclick="loginAsDemo()">
-          <span>⚡</span> Demo Login
-          <small>username: demo · password: demo123</small>
-        </button>
-      </div>
-      <p class="splash-note">June 2026 Trends · No API Keys · No Ads · All Local</p>
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth">
+  <div>
+    <div class="logo">✦ StyleAI</div>
+    <div class="logo-sub">Your digital wardrobe, styled by you</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <!-- Login -->
+    <div id="login-form">
+      <div class="field"><label>Username</label><input id="li-user" autocomplete="username" placeholder="yourname" /></div>
+      <div class="field"><label>Password</label><input id="li-pass" type="password" autocomplete="current-password" placeholder="••••••••" /></div>
+      <div class="err" id="li-err"></div>
+      <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      <div class="divider">or</div>
+      <button class="btn-ghost" onclick="doDemo()">⚡ Quick Demo Login</button>
+    </div>
+
+    <!-- Register -->
+    <div id="register-form" class="hidden">
+      <div class="field"><label>Full name</label><input id="rg-name" placeholder="Jane Doe" /></div>
+      <div class="field"><label>Username</label><input id="rg-user" placeholder="janedoe" /></div>
+      <div class="field"><label>Password</label><input id="rg-pass" type="password" placeholder="min. 6 characters" /></div>
+      <div class="err" id="rg-err"></div>
+      <button class="btn-primary" onclick="doRegister()">Create Account</button>
     </div>
   </div>
 
-  <!-- LOGIN -->
-  <div id="login-screen" class="screen">
-    <div class="auth-container">
-      <button class="back-btn" onclick="showScreen('splash-screen')">← Back</button>
-      <div class="auth-header">
-        <span class="logo-icon small">✦</span>
-        <h2>Welcome back</h2>
-        <p>Sign in to your style profile</p>
-      </div>
-      <div class="auth-form">
-        <div class="demo-hint-box">
-          <strong>Demo account:</strong> username <code>demo</code> · password <code>demo123</code>
-        </div>
-        <div class="form-group">
-          <label>Username</label>
-          <input type="text" id="login-username" placeholder="your username" autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
-        </div>
-        <div id="login-error" class="form-error hidden"></div>
-        <button class="btn-primary full" onclick="handleLogin()">Sign In</button>
-        <button class="btn-demo full" style="margin-top:0.5rem" onclick="loginAsDemo()">⚡ Quick Demo Login</button>
-        <p class="auth-switch">No account? <a onclick="showScreen('register-screen')">Create one</a></p>
-      </div>
+  <div style="font-size:.7rem;color:var(--text-3)">Your data stays on this device — no account, ad, or server required.</div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app">
+  <div class="topbar fixed-frame">
+    <div class="topbar-title" id="topbar-title">Wardrobe</div>
+    <div style="display:flex;gap:.5rem">
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+      <button class="icon-btn" onclick="switchTab('profile')" title="Profile">👤</button>
     </div>
   </div>
 
-  <!-- REGISTER -->
-  <div id="register-screen" class="screen">
-    <div class="auth-container scrollable">
-      <button class="back-btn" onclick="showScreen('splash-screen')">← Back</button>
-      <div class="auth-header">
-        <span class="logo-icon small">✦</span>
-        <h2>Create Profile</h2>
-        <p>Set up your style identity</p>
+  <main>
+    <!-- WARDROBE -->
+    <div class="panel active" id="panel-wardrobe">
+      <div class="cats" id="wardrobe-cats"></div>
+      <div class="grid3" id="wardrobe-grid"></div>
+    </div>
+
+    <!-- TRY-ON -->
+    <div class="panel" id="panel-tryon">
+      <div class="stage-frame">
+        <div class="stage" id="stage"></div>
       </div>
-      <div class="auth-form">
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" id="reg-name" placeholder="Your name" autocomplete="name" />
+      <div class="stage-controls hidden" id="layer-controls">
+        <div class="ctrl-row">
+          <span style="font-size:.75rem;color:var(--text-2);min-width:64px" id="layer-cat-label"></span>
+          <span style="flex:1"></span>
+          <button class="icon-btn" style="width:28px;height:28px" onclick="removeLayer()">✕</button>
         </div>
-        <div class="form-group">
-          <label>Username</label>
-          <input type="text" id="reg-username" placeholder="choose a username (min 3 chars)" autocomplete="off" />
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="reg-password" placeholder="min 6 characters" autocomplete="new-password" />
-        </div>
-        <div class="form-group">
-          <label>Gender</label>
-          <div class="pill-group" id="gender-group">
-            <button type="button" class="pill" data-val="male"      onclick="selectPill('gender-group',this)">Male</button>
-            <button type="button" class="pill" data-val="female"    onclick="selectPill('gender-group',this)">Female</button>
-            <button type="button" class="pill" data-val="nonbinary" onclick="selectPill('gender-group',this)">Non-binary</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>City</label>
-          <select id="reg-city"></select>
-        </div>
-        <div class="form-group">
-          <label>Body Type</label>
-          <div class="pill-group" id="bodytype-group">
-            <button type="button" class="pill" data-val="slim"     onclick="selectPill('bodytype-group',this)">Slim</button>
-            <button type="button" class="pill" data-val="athletic" onclick="selectPill('bodytype-group',this)">Athletic</button>
-            <button type="button" class="pill" data-val="average"  onclick="selectPill('bodytype-group',this)">Average</button>
-            <button type="button" class="pill" data-val="broad"    onclick="selectPill('bodytype-group',this)">Broad</button>
-            <button type="button" class="pill" data-val="plus"     onclick="selectPill('bodytype-group',this)">Plus</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Face Shape</label>
-          <div class="pill-group" id="faceshape-group">
-            <button type="button" class="pill" data-val="oval"   onclick="selectPill('faceshape-group',this)">Oval</button>
-            <button type="button" class="pill" data-val="round"  onclick="selectPill('faceshape-group',this)">Round</button>
-            <button type="button" class="pill" data-val="square" onclick="selectPill('faceshape-group',this)">Square</button>
-            <button type="button" class="pill" data-val="heart"  onclick="selectPill('faceshape-group',this)">Heart</button>
-            <button type="button" class="pill" data-val="oblong" onclick="selectPill('faceshape-group',this)">Oblong</button>
-          </div>
-        </div>
-        <div id="reg-error" class="form-error hidden"></div>
-        <button type="button" class="btn-primary full" onclick="handleRegister()">Create Account</button>
-        <p class="auth-switch">Already have one? <a onclick="showScreen('login-screen')">Sign in</a></p>
+        <div class="ctrl-row">🔍<input type="range" min="0.4" max="2.4" step="0.02" id="scale-slider" oninput="updateLayerScale(this.value)" /></div>
+        <div class="ctrl-row">↻<input type="range" min="-45" max="45" step="1" id="rotate-slider" oninput="updateLayerRotate(this.value)" /></div>
+      </div>
+      <div class="section-title">Tap to add to look</div>
+      <div class="cats" id="tryon-cats"></div>
+      <div class="strip" id="tryon-strip"></div>
+      <div class="fab-row">
+        <button class="btn-sm" onclick="openPersonPicker()">📷 Change Photo</button>
+        <button class="btn-sm primary" onclick="openSaveOutfitModal()">💾 Save Look</button>
       </div>
     </div>
-  </div>
 
-  <!-- Scripts — data first so CITIES is available for city select -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=2"></script>
-  <script type="module" src="js/cloud-sync.js?v=2"></script>
-  <script src="js/data.js"></script>
-  <script src="js/auth.js?v=2"></script>
-  <script src="js/ui.js"></script>
-  <script>
-    // Populate city select as soon as DOM + scripts are ready
-    document.addEventListener('DOMContentLoaded', function() {
-      populateCitySelect('reg-city', 'Mumbai');
-      // Auto-login if already has session
-      if (getCurrentUser()) {
-        window.location.href = 'pages/dashboard.html';
-      }
+    <!-- SUGGEST -->
+    <div class="panel" id="panel-suggest">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+        <div class="section-title" style="margin:0">Picked from your wardrobe</div>
+        <button class="btn-sm primary" style="flex:none;padding:.5rem 1rem" onclick="generateSuggestions()">🔀 Shuffle</button>
+      </div>
+      <div class="grid2" id="suggest-grid"></div>
+    </div>
+
+    <!-- SAVED -->
+    <div class="panel" id="panel-saved">
+      <div class="grid2" id="saved-grid"></div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="panel" id="panel-profile">
+      <div class="section-title" style="margin-top:0">Account</div>
+      <div class="profile-row"><span>Name</span><strong id="pf-name">—</strong></div>
+      <div class="profile-row"><span>Username</span><strong id="pf-user">—</strong></div>
+      <div class="section-title">Appearance</div>
+      <div class="profile-row">
+        <span>Theme</span>
+        <div class="pill-toggle">
+          <button id="theme-dark-btn" onclick="setTheme('dark')">Dark</button>
+          <button id="theme-light-btn" onclick="setTheme('light')">Light</button>
+        </div>
+      </div>
+      <div class="section-title">Plan</div>
+      <div class="profile-row"><span>Current plan</span><strong id="pf-plan">Free</strong></div>
+      <button class="btn-primary" style="margin-top:.5rem" onclick="openUpgradeModal()">Manage Plan — ₹99/mo</button>
+      <div class="section-title">Danger zone</div>
+      <button class="btn-ghost" onclick="doLogout()">Sign Out</button>
+      <button class="btn-danger" style="margin-top:.6rem" onclick="doDeleteAccount()">Delete Account &amp; All Data</button>
+    </div>
+  </main>
+
+  <nav class="bottom-nav fixed-frame">
+    <div class="nav-item active" id="nav-wardrobe" onclick="switchTab('wardrobe')"><span class="ic">👕</span>Wardrobe</div>
+    <div class="nav-item" id="nav-tryon" onclick="switchTab('tryon')"><span class="ic">🪞</span>Try-On</div>
+    <div class="nav-item" id="nav-suggest" onclick="switchTab('suggest')"><span class="ic">✨</span>Suggest</div>
+    <div class="nav-item" id="nav-saved" onclick="switchTab('saved')"><span class="ic">💾</span>Saved</div>
+  </nav>
+</div>
+
+<!-- ============ Add Item Modal ============ -->
+<div class="overlay hidden" id="item-modal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add Clothing Item</div>
+
+    <div class="photo-box" id="item-photo-box" onclick="document.getElementById('item-file-input').click()">
+      <div class="photo-ph" id="item-photo-ph"><span class="ic">📷</span>Tap to add a photo</div>
+      <img id="item-photo-preview" class="hidden" />
+    </div>
+    <input type="file" id="item-file-input" accept="image/*" class="hidden" onchange="onItemPhotoChosen(this)" />
+
+    <div class="detect-banner hidden" id="detect-banner">
+      <span id="detect-spinner">Detecting color…</span>
+      <span id="detect-result" class="hidden" style="display:flex;align-items:center;gap:.4rem"><span class="dot" id="detect-dot"></span><span id="detect-text"></span></span>
+    </div>
+
+    <div class="field" style="margin-top:.9rem"><label>Category</label>
+      <select id="item-category" onchange="renderColorSwatches()"></select>
+    </div>
+    <div class="field"><label>Name / subtype</label><input id="item-subtype" placeholder="e.g. White Tee, Denim Jacket" /></div>
+
+    <div class="field"><label>Color</label>
+      <div class="swatches" id="item-swatches"></div>
+      <input id="item-color-custom" placeholder="or type a custom color name" />
+    </div>
+
+    <button class="btn-primary" style="margin-top:.5rem" id="item-save-btn" onclick="saveItem()">Add Item</button>
+    <button class="btn-ghost" style="margin-top:.5rem" onclick="closeItemModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ============ Save Outfit Modal ============ -->
+<div class="overlay hidden" id="outfit-modal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Name this look</div>
+    <div class="field"><input id="outfit-name-input" placeholder="e.g. Weekend Brunch" /></div>
+    <button class="btn-primary" style="margin-top:.7rem" id="outfit-save-btn" onclick="confirmSaveOutfit()">Save to My Looks</button>
+    <button class="btn-ghost" style="margin-top:.5rem" onclick="closeSaveOutfitModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ============ Item Detail Modal ============ -->
+<div class="overlay hidden" id="detail-modal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <img id="detail-img" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;margin-bottom:.8rem" />
+    <div class="sheet-title" id="detail-title"></div>
+    <div style="color:var(--text-2);font-size:.85rem;margin-bottom:1rem" id="detail-meta"></div>
+    <button class="btn-danger" onclick="deleteDetailItem()">Remove from Wardrobe</button>
+    <button class="btn-ghost" style="margin-top:.5rem" onclick="closeDetailModal()">Close</button>
+  </div>
+</div>
+
+<!-- ============ Upgrade Modal (dummy) ============ -->
+<div class="overlay hidden" id="upgrade-modal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">StyleAI Plus</div>
+    <div style="border:1px solid var(--border);border-radius:14px;padding:1rem;margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <strong style="font-size:1.2rem">Monthly Plan</strong>
+        <span style="font-weight:700">₹99<span style="font-size:.7rem;color:var(--text-3)">/mo</span></span>
+      </div>
+      <ul style="margin:.7rem 0 0 1.1rem;font-size:.82rem;color:var(--text-2);line-height:1.7">
+        <li>Unlimited wardrobe items</li>
+        <li>Unlimited saved looks</li>
+        <li>Priority style suggestions</li>
+      </ul>
+    </div>
+    <button class="btn-primary" id="upgrade-btn" onclick="mockSubscribe()">Subscribe — ₹99/month</button>
+    <div style="font-size:.68rem;text-align:center;color:var(--text-3);margin-top:.5rem">Test mode — no real payment is charged.</div>
+    <button class="btn-ghost" style="margin-top:.6rem" onclick="closeUpgradeModal()">Close</button>
+  </div>
+</div>
+
+<input type="file" id="person-file-input" accept="image/*" class="hidden" onchange="onPersonPhotoChosen(this)" />
+
+<script>
+/* ============================================================
+   STYLEAI — single-file rebuild
+   Everything persists in localStorage on this device. No
+   backend, no external requests, nothing that can fail due to
+   third-party config — built for a hard launch deadline.
+   ============================================================ */
+
+const CATEGORIES = ['Tops','Bottoms','Outerwear','Footwear','Accessories','Ethnic'];
+const DEFAULT_Y  = {Tops:36,Bottoms:63,Outerwear:34,Footwear:89,Accessories:18,Ethnic:36};
+const Z_ORDER    = {Bottoms:1,Footwear:2,Tops:3,Ethnic:3,Outerwear:4,Accessories:5};
+const COLORS = [
+  {name:'White',hex:'#f4f4f2'},{name:'Black',hex:'#1a1a1a'},{name:'Grey',hex:'#8c8c8c'},
+  {name:'Navy',hex:'#1c3764'},{name:'Sky Blue',hex:'#5aa0dc'},{name:'Denim Blue',hex:'#46709f'},
+  {name:'Beige',hex:'#d7c39b'},{name:'Khaki',hex:'#c3af78'},{name:'Olive',hex:'#647937'},
+  {name:'Forest Green',hex:'#28563c'},{name:'Brown',hex:'#7d502d'},{name:'Rust',hex:'#c35028'},
+  {name:'Burgundy',hex:'#781e32'},{name:'Red',hex:'#c82323'},{name:'Coral',hex:'#e66e5a'},
+  {name:'Blush',hex:'#ebaaa5'},{name:'Pink',hex:'#e682a0'},{name:'Purple',hex:'#78349a'},
+  {name:'Mustard',hex:'#d2a519'},{name:'Yellow',hex:'#dcc832'},{name:'Orange',hex:'#dc7828'},
+  {name:'Cream',hex:'#f0e6ce'},{name:'Charcoal',hex:'#3c3c3c'},{name:'Mint',hex:'#73c8aa'},
+];
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function zFor(cat){ return Z_ORDER[cat] ?? 6; }
+function defaultY(cat){ return DEFAULT_Y[cat] ?? 50; }
+function esc(s){ return (s||'').toString().replace(/[<>&"]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+/* ---------------- Toast ---------------- */
+function toast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2400);
+}
+
+/* ---------------- Storage helpers (namespaced per user) ---------------- */
+function lsGet(key, fallback){
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch { return fallback; }
+}
+function lsSet(key, val){
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; }
+  catch(e){ console.warn('storage failed', e); return false; }
+}
+
+function usersKey(){ return 'styleai_users'; }
+function sessionKey(){ return 'styleai_session'; }
+function wardrobeKey(u){ return 'styleai_wardrobe_' + u; }
+function outfitsKey(u){ return 'styleai_outfits_' + u; }
+function personKey(u){ return 'styleai_person_' + u; }
+function planKey(u){ return 'styleai_plan_' + u; }
+
+/* ---------------- Auth ---------------- */
+let CURRENT_USER = null;
+
+function simpleHash(pw){ return btoa(unescape(encodeURIComponent(pw))); }
+
+function switchAuthTab(tab){
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('login-form').classList.toggle('hidden', tab!=='login');
+  document.getElementById('register-form').classList.toggle('hidden', tab!=='register');
+}
+
+function doLogin(){
+  const u = (document.getElementById('li-user').value||'').trim().toLowerCase();
+  const p = document.getElementById('li-pass').value||'';
+  const errEl = document.getElementById('li-err');
+  errEl.textContent = '';
+  if(!u || !p){ errEl.textContent = 'Please fill in all fields.'; return; }
+  const users = lsGet(usersKey(), {});
+  const user = users[u];
+  if(!user || user.password !== simpleHash(p)){ errEl.textContent = 'Invalid username or password.'; return; }
+  setSession(u);
+  enterApp();
+}
+
+function doRegister(){
+  const name = (document.getElementById('rg-name').value||'').trim();
+  const u    = (document.getElementById('rg-user').value||'').trim().toLowerCase();
+  const p    = document.getElementById('rg-pass').value||'';
+  const errEl = document.getElementById('rg-err');
+  errEl.textContent = '';
+  if(!name){ errEl.textContent = 'Please enter your name.'; return; }
+  if(!u || u.length<3){ errEl.textContent = 'Username must be at least 3 characters.'; return; }
+  if(!p || p.length<6){ errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  const users = lsGet(usersKey(), {});
+  if(users[u]){ errEl.textContent = 'Username already taken.'; return; }
+  users[u] = { username:u, name, password:simpleHash(p), createdAt:Date.now() };
+  lsSet(usersKey(), users);
+  setSession(u);
+  enterApp();
+}
+
+function doDemo(){
+  const users = lsGet(usersKey(), {});
+  if(!users['demo']){
+    users['demo'] = { username:'demo', name:'Demo User', password:simpleHash('demo123'), createdAt:Date.now(), isDemo:true };
+    lsSet(usersKey(), users);
+  }
+  setSession('demo');
+  enterApp();
+}
+
+function setSession(username){ lsSet(sessionKey(), { username }); }
+function clearSession(){ localStorage.removeItem(sessionKey()); }
+
+function doLogout(){
+  clearSession();
+  CURRENT_USER = null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('auth').style.display = 'flex';
+}
+
+function doDeleteAccount(){
+  if(CURRENT_USER.isDemo){ toast('Cannot delete the demo account'); return; }
+  if(!confirm('Delete your account and all data on this device? This cannot be undone.')) return;
+  const users = lsGet(usersKey(), {});
+  delete users[CURRENT_USER.username];
+  lsSet(usersKey(), users);
+  localStorage.removeItem(wardrobeKey(CURRENT_USER.username));
+  localStorage.removeItem(outfitsKey(CURRENT_USER.username));
+  localStorage.removeItem(personKey(CURRENT_USER.username));
+  localStorage.removeItem(planKey(CURRENT_USER.username));
+  doLogout();
+}
+
+/* ---------------- App state ---------------- */
+let WARDROBE = [];        // [{id,category,subtype,color,hex,imageData}]
+let OUTFITS  = [];        // saved looks
+let PERSON_PHOTO = null;
+let ACTIVE_LAYERS = {};   // {category: {itemId,src,x,y,scale,rotation}}
+let SELECTED_CAT = null;
+let WARDROBE_FILTER = CATEGORIES[0];
+let TRYON_FILTER = CATEGORIES[0];
+let PENDING_ITEM_PHOTO = null;
+
+function enterApp(){
+  const users = lsGet(usersKey(), {});
+  CURRENT_USER = users[lsGet(sessionKey(), {}).username];
+  if(!CURRENT_USER){ doLogout(); return; }
+
+  WARDROBE = lsGet(wardrobeKey(CURRENT_USER.username), []);
+  OUTFITS  = lsGet(outfitsKey(CURRENT_USER.username), []);
+  PERSON_PHOTO = lsGet(personKey(CURRENT_USER.username), null);
+  ACTIVE_LAYERS = {};
+
+  document.getElementById('auth').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+
+  document.getElementById('pf-name').textContent = CURRENT_USER.name || CURRENT_USER.username;
+  document.getElementById('pf-user').textContent = '@' + CURRENT_USER.username;
+  const plan = lsGet(planKey(CURRENT_USER.username), {active:false});
+  document.getElementById('pf-plan').textContent = plan.active ? 'StyleAI Plus' : 'Free';
+
+  renderCatChips('wardrobe-cats', WARDROBE_FILTER, (c)=>{ WARDROBE_FILTER=c; renderWardrobeCats(); renderWardrobeGrid(); });
+  renderCatChips('tryon-cats', TRYON_FILTER, (c)=>{ TRYON_FILTER=c; renderTryonCats(); renderTryonStrip(); });
+  renderWardrobeGrid();
+  renderStage();
+  renderTryonStrip();
+  renderSaved();
+  applyTheme(lsGet('styleai_theme','dark'));
+}
+
+/* ---------------- Tabs ---------------- */
+function switchTab(tab){
+  ['wardrobe','tryon','suggest','saved','profile'].forEach(t=>{
+    document.getElementById('panel-'+t)?.classList.toggle('active', t===tab);
+  });
+  ['wardrobe','tryon','suggest','saved'].forEach(t=>{
+    document.getElementById('nav-'+t)?.classList.toggle('active', t===tab);
+  });
+  const titles = {wardrobe:'Wardrobe', tryon:'Try-On', suggest:'Suggestions', saved:'Saved Looks', profile:'Profile'};
+  document.getElementById('topbar-title').textContent = titles[tab] || 'StyleAI';
+}
+
+/* ---------------- Category chips ---------------- */
+function renderCatChips(containerId, active, onSelect){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  CATEGORIES.forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.className = 'cat-chip' + (cat===active ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = ()=>{ onSelect(cat); };
+    el.appendChild(chip);
+  });
+}
+function renderWardrobeCats(){ renderCatChips('wardrobe-cats', WARDROBE_FILTER, (c)=>{ WARDROBE_FILTER=c; renderWardrobeCats(); renderWardrobeGrid(); }); }
+function renderTryonCats(){ renderCatChips('tryon-cats', TRYON_FILTER, (c)=>{ TRYON_FILTER=c; renderTryonCats(); renderTryonStrip(); }); }
+
+/* ---------------- Wardrobe grid ---------------- */
+function renderWardrobeGrid(){
+  const grid = document.getElementById('wardrobe-grid');
+  const items = WARDROBE.filter(i=>i.category===WARDROBE_FILTER);
+  grid.innerHTML = '';
+
+  const addTile = document.createElement('div');
+  addTile.className = 'add-tile';
+  addTile.innerHTML = '<span style="font-size:1.4rem">+</span><span>Add item</span>';
+  addTile.onclick = ()=>openItemModal();
+  grid.appendChild(addTile);
+
+  if(items.length===0){
+    const hint = document.createElement('div');
+    hint.style.cssText = 'grid-column:span 2;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:.8rem;text-align:center;padding:0 1rem';
+    hint.textContent = 'No ' + WARDROBE_FILTER.toLowerCase() + ' yet — add your first piece.';
+    grid.appendChild(hint);
+    return;
+  }
+
+  items.forEach(item=>{
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.onclick = ()=>openDetailModal(item.id);
+    if(item.imageData){
+      card.innerHTML = `<img src="${item.imageData}" alt=""><div class="badge">${esc(item.subtype||item.color)}</div>`;
+    } else {
+      card.innerHTML = `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem">
+        <span class="dot" style="width:22px;height:22px;background:${item.hex||'#888'}"></span>
+        <span style="font-size:.65rem;color:var(--text-3);text-align:center;padding:0 .3rem">${esc(item.color)}</span>
+      </div>`;
+    }
+    grid.appendChild(card);
+  });
+}
+
+/* ---------------- Item modal ---------------- */
+function openItemModal(){
+  PENDING_ITEM_PHOTO = null;
+  document.getElementById('item-photo-preview').classList.add('hidden');
+  document.getElementById('item-photo-ph').classList.remove('hidden');
+  document.getElementById('detect-banner').classList.add('hidden');
+  document.getElementById('item-subtype').value = '';
+  document.getElementById('item-color-custom').value = '';
+
+  const sel = document.getElementById('item-category');
+  sel.innerHTML = CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.value = WARDROBE_FILTER;
+
+  renderColorSwatches();
+  document.getElementById('item-modal').classList.remove('hidden');
+}
+function closeItemModal(){ document.getElementById('item-modal').classList.add('hidden'); }
+
+function renderColorSwatches(){
+  const row = document.getElementById('item-swatches');
+  row.innerHTML = '';
+  COLORS.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.style.background = c.hex;
+    sw.title = c.name;
+    sw.dataset.name = c.name;
+    sw.onclick = ()=>{
+      row.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
+      sw.classList.add('selected');
+      document.getElementById('item-color-custom').value = '';
+      row.dataset.selected = c.name;
+    };
+    row.appendChild(sw);
+  });
+}
+
+function onItemPhotoChosen(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    compressImage(e.target.result, 900, 0.8, (compressed)=>{
+      PENDING_ITEM_PHOTO = compressed;
+      document.getElementById('item-photo-preview').src = compressed;
+      document.getElementById('item-photo-preview').classList.remove('hidden');
+      document.getElementById('item-photo-ph').classList.add('hidden');
+      runAutoDetectColor(compressed);
     });
-  </script>
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function runAutoDetectColor(dataUrl){
+  const banner = document.getElementById('detect-banner');
+  const spinner = document.getElementById('detect-spinner');
+  const result = document.getElementById('detect-result');
+  banner.classList.remove('hidden');
+  spinner.classList.remove('hidden');
+  result.classList.add('hidden');
+
+  detectDominantColor(dataUrl).then(({name, hex, confidence})=>{
+    spinner.classList.add('hidden');
+    if(name){
+      result.classList.remove('hidden');
+      document.getElementById('detect-dot').style.background = hex;
+      document.getElementById('detect-text').textContent = 'Detected: ' + name + (confidence? ' ('+confidence+'% match)':'');
+      const row = document.getElementById('item-swatches');
+      row.querySelectorAll('.swatch').forEach(s=>{
+        s.classList.toggle('selected', s.dataset.name === name);
+      });
+      row.dataset.selected = name;
+    } else {
+      spinner.textContent = 'Could not detect — please pick a color below';
+      spinner.classList.remove('hidden');
+    }
+  });
+}
+
+function saveItem(){
+  const category = document.getElementById('item-category').value;
+  const subtype  = (document.getElementById('item-subtype').value||'').trim();
+  const custom   = (document.getElementById('item-color-custom').value||'').trim();
+  const selectedName = document.getElementById('item-swatches').dataset.selected || '';
+  const color = custom || selectedName;
+
+  if(!color){ toast('Please select or type a color'); return; }
+
+  const colorObj = COLORS.find(c=>c.name.toLowerCase()===color.toLowerCase());
+  const item = {
+    id: uid(), category, subtype: subtype || color, color,
+    hex: colorObj ? colorObj.hex : '#888888',
+    imageData: PENDING_ITEM_PHOTO || null,
+    addedAt: Date.now(),
+  };
+
+  const btn = document.getElementById('item-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  WARDROBE.push(item);
+  const ok = lsSet(wardrobeKey(CURRENT_USER.username), WARDROBE);
+
+  btn.disabled = false; btn.textContent = 'Add Item';
+
+  if(ok){
+    closeItemModal();
+    WARDROBE_FILTER = category;
+    renderWardrobeCats();
+    renderWardrobeGrid();
+    renderTryonCats();
+    renderTryonStrip();
+    toast((subtype||color) + ' added to your wardrobe ✦');
+  } else {
+    WARDROBE.pop();
+    toast('Could not save — your browser storage may be full. Try a smaller photo.');
+  }
+}
+
+/* ---------------- Item detail modal ---------------- */
+let DETAIL_ITEM_ID = null;
+function openDetailModal(id){
+  const item = WARDROBE.find(i=>i.id===id);
+  if(!item) return;
+  DETAIL_ITEM_ID = id;
+  const img = document.getElementById('detail-img');
+  if(item.imageData){ img.src = item.imageData; img.classList.remove('hidden'); }
+  else { img.classList.add('hidden'); }
+  document.getElementById('detail-title').textContent = item.subtype || item.color;
+  document.getElementById('detail-meta').textContent = item.category + ' · ' + item.color;
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+function closeDetailModal(){ document.getElementById('detail-modal').classList.add('hidden'); DETAIL_ITEM_ID=null; }
+function deleteDetailItem(){
+  if(!DETAIL_ITEM_ID) return;
+  if(!confirm('Remove this item from your wardrobe?')) return;
+  WARDROBE = WARDROBE.filter(i=>i.id!==DETAIL_ITEM_ID);
+  lsSet(wardrobeKey(CURRENT_USER.username), WARDROBE);
+  closeDetailModal();
+  renderWardrobeGrid();
+  renderTryonStrip();
+  toast('Item removed');
+}
+
+/* ---------------- Try-on stage ---------------- */
+function openPersonPicker(){ document.getElementById('person-file-input').click(); }
+function onPersonPhotoChosen(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    compressImage(e.target.result, 1000, 0.85, (compressed)=>{
+      PERSON_PHOTO = compressed;
+      lsSet(personKey(CURRENT_USER.username), compressed);
+      renderStage();
+      toast('Photo updated');
+    });
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+let SELECTED_LAYER_CAT = null;
+let dragState = null;
+
+function renderStage(){
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '';
+  stage.onpointermove = onStagePointerMove;
+  stage.onpointerup = ()=>{ dragState=null; };
+  stage.onpointerleave = ()=>{ dragState=null; };
+  stage.onclick = (e)=>{ if(e.target===stage) deselectLayer(); };
+
+  if(PERSON_PHOTO){
+    const img = document.createElement('img');
+    img.src = PERSON_PHOTO;
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
+    stage.appendChild(img);
+  } else {
+    const empty = document.createElement('div');
+    empty.className = 'stage-empty';
+    empty.innerHTML = '<div style="font-size:2rem">📷</div><div style="font-weight:700">Upload a full-length photo</div><button class="btn-sm primary" style="max-width:160px" onclick="openPersonPicker()">Choose Photo</button>';
+    stage.appendChild(empty);
+  }
+
+  Object.entries(ACTIVE_LAYERS)
+    .sort((a,b)=>zFor(a[0])-zFor(b[0]))
+    .forEach(([cat, l])=>{
+      const div = document.createElement('div');
+      div.className = 'layer' + (SELECTED_LAYER_CAT===cat ? ' sel' : '');
+      div.style.cssText = `left:${l.x}%;top:${l.y}%;width:${45*l.scale}%;z-index:${zFor(cat)};rotate:${l.rotation}deg`;
+      div.innerHTML = `<img src="${l.src}" draggable="false">`;
+      div.onpointerdown = (e)=>{ e.stopPropagation(); selectLayer(cat); dragState={cat, rect:stage.getBoundingClientRect()}; };
+      stage.appendChild(div);
+    });
+}
+
+function onStagePointerMove(e){
+  if(!dragState) return;
+  const {cat, rect} = dragState;
+  const x = Math.min(100, Math.max(0, ((e.clientX-rect.left)/rect.width)*100));
+  const y = Math.min(100, Math.max(0, ((e.clientY-rect.top)/rect.height)*100));
+  ACTIVE_LAYERS[cat].x = x; ACTIVE_LAYERS[cat].y = y;
+  renderStage();
+}
+
+function selectLayer(cat){
+  SELECTED_LAYER_CAT = cat;
+  const l = ACTIVE_LAYERS[cat];
+  document.getElementById('layer-controls').classList.remove('hidden');
+  document.getElementById('layer-cat-label').textContent = cat;
+  document.getElementById('scale-slider').value = l.scale;
+  document.getElementById('rotate-slider').value = l.rotation;
+  renderStage();
+}
+function deselectLayer(){ SELECTED_LAYER_CAT=null; document.getElementById('layer-controls').classList.add('hidden'); renderStage(); }
+function updateLayerScale(v){ if(!SELECTED_LAYER_CAT) return; ACTIVE_LAYERS[SELECTED_LAYER_CAT].scale = parseFloat(v); renderStage(); }
+function updateLayerRotate(v){ if(!SELECTED_LAYER_CAT) return; ACTIVE_LAYERS[SELECTED_LAYER_CAT].rotation = parseFloat(v); renderStage(); }
+function removeLayer(){ if(!SELECTED_LAYER_CAT) return; delete ACTIVE_LAYERS[SELECTED_LAYER_CAT]; deselectLayer(); renderTryonStrip(); }
+
+function renderTryonStrip(){
+  const strip = document.getElementById('tryon-strip');
+  const items = WARDROBE.filter(i=>i.category===TRYON_FILTER);
+  strip.innerHTML = '';
+  if(items.length===0){
+    strip.innerHTML = `<div style="color:var(--text-3);font-size:.8rem;padding:.5rem 0">No ${TRYON_FILTER.toLowerCase()} in your wardrobe yet.</div>`;
+    return;
+  }
+  items.forEach(item=>{
+    const on = ACTIVE_LAYERS[item.category]?.itemId === item.id;
+    const el = document.createElement('div');
+    el.className = 'strip-item' + (on ? ' on' : '');
+    el.innerHTML = (item.imageData ? `<img src="${item.imageData}">` : `<div style="width:100%;height:100%;background:${item.hex}"></div>`) + (on ? '<span class="chk">✓</span>' : '');
+    el.onclick = ()=>toggleLayer(item);
+    strip.appendChild(el);
+  });
+}
+
+function toggleLayer(item){
+  if(ACTIVE_LAYERS[item.category]?.itemId === item.id){
+    delete ACTIVE_LAYERS[item.category];
+  } else {
+    ACTIVE_LAYERS[item.category] = { itemId:item.id, src:item.imageData || _solidColorDataUrl(item.hex), x:50, y:defaultY(item.category), scale:1, rotation:0 };
+  }
+  renderStage();
+  renderTryonStrip();
+}
+
+function _solidColorDataUrl(hex){
+  const c = document.createElement('canvas'); c.width=100; c.height=140;
+  const ctx = c.getContext('2d'); ctx.fillStyle = hex || '#999'; ctx.fillRect(0,0,100,140);
+  return c.toDataURL('image/png');
+}
+
+/* ---------------- Save outfit ---------------- */
+function openSaveOutfitModal(){
+  if(Object.keys(ACTIVE_LAYERS).length===0){ toast('Add at least one item to your look first'); return; }
+  document.getElementById('outfit-name-input').value = '';
+  document.getElementById('outfit-modal').classList.remove('hidden');
+}
+function closeSaveOutfitModal(){ document.getElementById('outfit-modal').classList.add('hidden'); }
+
+function confirmSaveOutfit(){
+  const name = (document.getElementById('outfit-name-input').value||'').trim() || ('Look ' + (OUTFITS.length+1));
+  const layers = Object.entries(ACTIVE_LAYERS).map(([category,l])=>({category, ...l}));
+  const btn = document.getElementById('outfit-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  compositeThumbnail(PERSON_PHOTO, layers, 300, 400).then(thumb=>{
+    const outfit = { id:uid(), name, layers, thumb, createdAt:Date.now() };
+    OUTFITS.unshift(outfit);
+    const ok = lsSet(outfitsKey(CURRENT_USER.username), OUTFITS);
+    btn.disabled = false; btn.textContent = 'Save to My Looks';
+    if(ok){
+      closeSaveOutfitModal();
+      renderSaved();
+      toast('Look saved ✦');
+    } else {
+      OUTFITS.shift();
+      toast('Could not save — storage may be full');
+    }
+  });
+}
+
+function renderSaved(){
+  const grid = document.getElementById('saved-grid');
+  grid.innerHTML = '';
+  if(OUTFITS.length===0){
+    grid.innerHTML = '<div class="empty" style="grid-column:span 2"><div class="ic">💾</div>No saved looks yet — build one in Try-On.</div>';
+    return;
+  }
+  OUTFITS.forEach(o=>{
+    const card = document.createElement('div');
+    card.className = 'outfit-card';
+    card.innerHTML = `<img src="${o.thumb}"><div class="meta"><span>${esc(o.name)}</span><span style="cursor:pointer" onclick="deleteOutfit('${o.id}', event)">✕</span></div>`;
+    card.querySelector('img').onclick = ()=>applyOutfit(o.id);
+    grid.appendChild(card);
+  });
+}
+
+function applyOutfit(id){
+  const outfit = OUTFITS.find(o=>o.id===id);
+  if(!outfit) return;
+  ACTIVE_LAYERS = {};
+  outfit.layers.forEach(l=>{ ACTIVE_LAYERS[l.category] = { itemId:l.itemId, src:l.src, x:l.x, y:l.y, scale:l.scale, rotation:l.rotation }; });
+  switchTab('tryon');
+  renderStage();
+  renderTryonStrip();
+  toast('Wearing "' + outfit.name + '"');
+}
+
+function deleteOutfit(id, e){
+  e.stopPropagation();
+  OUTFITS = OUTFITS.filter(o=>o.id!==id);
+  lsSet(outfitsKey(CURRENT_USER.username), OUTFITS);
+  renderSaved();
+}
+
+/* ---------------- Suggestions ---------------- */
+function generateSuggestions(){
+  const grid = document.getElementById('suggest-grid');
+  const pool = CATEGORIES.filter(c=>WARDROBE.some(i=>i.category===c));
+  if(pool.length===0){ grid.innerHTML = '<div class="empty" style="grid-column:span 2"><div class="ic">✨</div>Add some clothes first to get outfit ideas.</div>'; return; }
+
+  grid.innerHTML = '<div class="empty" style="grid-column:span 2">Styling looks…</div>';
+
+  const combos = []; const seen = new Set();
+  for(let i=0; i<10 && combos.length<4; i++){
+    const layers = pool.map(cat=>{
+      const arr = WARDROBE.filter(x=>x.category===cat);
+      const pick = arr[Math.floor(Math.random()*arr.length)];
+      return { category:cat, itemId:pick.id, src:pick.imageData || _solidColorDataUrl(pick.hex), x:50, y:defaultY(cat), scale:1, rotation:0 };
+    });
+    const key = layers.map(l=>l.itemId).sort().join('-');
+    if(seen.has(key)) continue;
+    seen.add(key); combos.push(layers);
+  }
+
+  Promise.all(combos.map(layers=>compositeThumbnail(PERSON_PHOTO, layers, 300, 400).then(thumb=>({layers, thumb})))).then(results=>{
+    grid.innerHTML = '';
+    results.forEach(r=>{
+      const card = document.createElement('div');
+      card.className = 'outfit-card';
+      card.innerHTML = `<img src="${r.thumb}"><div class="meta"><span>Wear this</span><span>✓</span></div>`;
+      card.onclick = ()=>{
+        ACTIVE_LAYERS = {};
+        r.layers.forEach(l=>{ ACTIVE_LAYERS[l.category] = {itemId:l.itemId, src:l.src, x:l.x, y:l.y, scale:l.scale, rotation:l.rotation}; });
+        switchTab('tryon'); renderStage(); renderTryonStrip();
+      };
+      grid.appendChild(card);
+    });
+  });
+}
+
+/* ---------------- Theme ---------------- */
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = theme==='dark' ? '🌙' : '☀️';
+  document.getElementById('theme-dark-btn')?.classList.toggle('active', theme==='dark');
+  document.getElementById('theme-light-btn')?.classList.toggle('active', theme==='light');
+}
+function setTheme(theme){ lsSet('styleai_theme', theme); applyTheme(theme); }
+function toggleTheme(){ setTheme(lsGet('styleai_theme','dark')==='dark' ? 'light' : 'dark'); }
+
+/* ---------------- Upgrade (dummy, non-blocking) ---------------- */
+function openUpgradeModal(){ document.getElementById('upgrade-modal').classList.remove('hidden'); }
+function closeUpgradeModal(){ document.getElementById('upgrade-modal').classList.add('hidden'); }
+function mockSubscribe(){
+  lsSet(planKey(CURRENT_USER.username), { active:true, since:Date.now() });
+  document.getElementById('pf-plan').textContent = 'StyleAI Plus';
+  document.getElementById('upgrade-btn').textContent = '✓ Subscribed';
+  setTimeout(closeUpgradeModal, 700);
+}
+
+/* ---------------- Image helpers ---------------- */
+function compressImage(dataUrl, maxDim, quality, cb){
+  const img = new Image();
+  img.onload = ()=>{
+    try{
+      let w = img.naturalWidth||img.width, h = img.naturalHeight||img.height;
+      if(w > maxDim || h > maxDim){
+        if(w >= h){ h = Math.round(h*maxDim/w); w = maxDim; } else { w = Math.round(w*maxDim/h); h = maxDim; }
+      }
+      const c = document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg', quality));
+    } catch(e){ cb(dataUrl); }
+  };
+  img.onerror = ()=>cb(dataUrl);
+  img.src = dataUrl;
+}
+
+function loadImg(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+
+async function compositeThumbnail(personSrc, layers, w, h){
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-elevated') || '#262a33';
+  ctx.fillRect(0,0,w,h);
+  if(personSrc){
+    try{
+      const img = await loadImg(personSrc);
+      const scale = Math.max(w/img.width, h/img.height);
+      const dw=img.width*scale, dh=img.height*scale;
+      ctx.drawImage(img, (w-dw)/2, (h-dh)/2, dw, dh);
+    } catch{}
+  }
+  const sorted = [...layers].sort((a,b)=>zFor(a.category)-zFor(b.category));
+  for(const l of sorted){
+    try{
+      const img = await loadImg(l.src);
+      const baseW = w*0.5*l.scale, ratio = img.height/img.width, dw=baseW, dh=baseW*ratio;
+      const cx=(l.x/100)*w, cy=(l.y/100)*h;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate((l.rotation*Math.PI)/180);
+      ctx.drawImage(img, -dw/2, -dh/2, dw, dh); ctx.restore();
+    } catch{}
+  }
+  return c.toDataURL('image/jpeg', 0.8);
+}
+
+/* ---------------- Color detection (center-crop, foreground-weighted) ---------------- */
+function detectDominantColor(dataUrl){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    const timeout = setTimeout(()=>resolve({name:'',hex:'',confidence:0}), 4000);
+    img.onload = ()=>{
+      clearTimeout(timeout);
+      try{
+        const SIZE = 100;
+        const c = document.createElement('canvas'); c.width=SIZE; c.height=SIZE;
+        const ctx = c.getContext('2d', {willReadFrequently:true}) || c.getContext('2d');
+        // sample only the centered ~55% of the photo — avoids background/table/hands
+        const sw = img.naturalWidth||img.width, sh = img.naturalHeight||img.height;
+        const cropFrac = 0.55, cw = sw*cropFrac, ch = sh*cropFrac, sx=(sw-cw)/2, sy=(sh-ch)/2;
+        ctx.drawImage(img, sx, sy, cw, ch, 0, 0, SIZE, SIZE);
+        const data = ctx.getImageData(0,0,SIZE,SIZE).data;
+
+        const buckets = {}; let total=0;
+        for(let i=0;i<data.length;i+=4){
+          const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3];
+          if(a<128) continue;
+          const brightness = (r+g+b)/3;
+          if(brightness>251) continue; // paper-white blowout only
+          if(brightness<6) continue;   // crushed-black only
+          const qr=Math.round(r/20)*20, qg=Math.round(g/20)*20, qb=Math.round(b/20)*20;
+          const key = qr+','+qg+','+qb;
+          buckets[key] = (buckets[key]||0)+1; total++;
+        }
+        let r,g,b;
+        if(total===0){
+          let tr=0,tg=0,tb=0,n=0;
+          for(let i=0;i<data.length;i+=4){ if(data[i+3]<128) continue; tr+=data[i];tg+=data[i+1];tb+=data[i+2];n++; }
+          [r,g,b] = n ? [Math.round(tr/n),Math.round(tg/n),Math.round(tb/n)] : [128,128,128];
+        } else {
+          let bestKey=null,bestCount=0;
+          for(const [k,count] of Object.entries(buckets)){ if(count>bestCount){bestCount=count;bestKey=k;} }
+          [r,g,b] = bestKey.split(',').map(Number);
+        }
+
+        let best=null, bestDist=Infinity;
+        COLORS.forEach(col=>{
+          const hx = col.hex.replace('#','');
+          const cr=parseInt(hx.slice(0,2),16), cg=parseInt(hx.slice(2,4),16), cb=parseInt(hx.slice(4,6),16);
+          const d = Math.sqrt(2*(r-cr)**2 + 4*(g-cg)**2 + 3*(b-cb)**2);
+          if(d<bestDist){ bestDist=d; best=col; }
+        });
+        const confidence = Math.max(0, Math.round((1-bestDist/250)*100));
+        const hex = '#' + [r,g,b].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
+        resolve({ name: best?.name || '', hex, confidence });
+      } catch(e){ resolve({name:'',hex:'',confidence:0}); }
+    };
+    img.onerror = ()=>{ clearTimeout(timeout); resolve({name:'',hex:'',confidence:0}); };
+    img.src = dataUrl;
+  });
+}
+
+/* ---------------- Boot ---------------- */
+(function boot(){
+  applyTheme(lsGet('styleai_theme','dark'));
+  const session = lsGet(sessionKey(), null);
+  if(session && session.username){
+    const users = lsGet(usersKey(), {});
+    if(users[session.username]){ enterApp(); return; }
+  }
+  document.getElementById('auth').style.display = 'flex';
+})();
+</script>
 </body>
 </html>
