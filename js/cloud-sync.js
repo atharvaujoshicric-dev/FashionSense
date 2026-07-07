@@ -28,10 +28,10 @@ function injectLoader(msg) {
   const el = document.createElement('div');
   el.id = 'cloud-sync-loader';
   el.style.cssText = `
-    position:fixed; inset:0; z-index:99999; background:#1b1620; color:#f3ece6;
+    position:fixed; inset:0; z-index:99999; background:#15171c; color:#f2f3f5;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:10px; font:500 14px system-ui,sans-serif; letter-spacing:.02em;`;
-  el.innerHTML = `<div style="width:26px;height:26px;border-radius:999px;border:3px solid rgba(243,236,230,.25);border-top-color:#c2455b;animation:cs-spin 0.8s linear infinite"></div><div>${msg}</div>
+  el.innerHTML = `<div style="width:26px;height:26px;border-radius:999px;border:3px solid rgba(242,243,245,.25);border-top-color:#4f63d2;animation:cs-spin 0.8s linear infinite"></div><div>${msg}</div>
     <style>@keyframes cs-spin{to{transform:rotate(360deg)}}</style>`;
   document.documentElement.appendChild(el);
   return el;
@@ -50,8 +50,8 @@ function showFatalError(title, detail) {
       <div style="font-size:22px; margin-bottom:8px;">⚠️</div>
       <div style="font-weight:600; margin-bottom:6px;">${title}</div>
       <div style="font-size:12.5px; opacity:.75; line-height:1.5;">${detail}</div>
-      <button onclick="location.reload()" style="margin-top:16px; background:#c2455b; color:#fbf3ef; border:none; padding:9px 16px; border-radius:999px; font-weight:600; font-size:13px; cursor:pointer;">Retry</button>
-      <div style="margin-top:10px;"><a href="${IS_PROTECTED ? '../index.html' : 'index.html'}" style="color:#f3ece6; font-size:12px; text-decoration:underline;">Back to login</a></div>
+      <button onclick="location.reload()" style="margin-top:16px; background:#4f63d2; color:#fbfbfe; border:none; padding:9px 16px; border-radius:999px; font-weight:600; font-size:13px; cursor:pointer;">Retry</button>
+      <div style="margin-top:10px;"><a href="${IS_PROTECTED ? '../index.html' : 'index.html'}" style="color:#f2f3f5; font-size:12px; text-decoration:underline;">Back to login</a></div>
     </div>`;
   window.__cloudSyncError = title;
 }
@@ -96,9 +96,9 @@ async function hydrate() {
 
   const uid = session.user.id;
 
-  let profile, wardrobeRow, outfitsRow, calRow;
+  let profile, wardrobeRes, outfitsRes, calRes;
   try {
-    let profileRes, wardrobeRes, outfitsRes, calRes;
+    let profileRes;
     [profileRes, wardrobeRes, outfitsRes, calRes] = await Promise.all([
       window.supabaseClient.from('profiles').select('*').eq('id', uid).maybeSingle(),
       window.supabaseClient.from('wardrobe').select('items').eq('user_id', uid).maybeSingle(),
@@ -106,7 +106,7 @@ async function hydrate() {
       window.supabaseClient.from('calendar_entries').select('entries').eq('user_id', uid).maybeSingle(),
     ]);
     if (profileRes.error) throw profileRes.error;
-    profile = profileRes.data; wardrobeRow = wardrobeRes.data; outfitsRow = outfitsRes.data; calRow = calRes.data;
+    profile = profileRes.data;
   } catch (e) {
     showFatalError(
       'Could not load your account',
@@ -156,9 +156,22 @@ async function hydrate() {
   };
 
   const uname = window.__currentUser.username;
-  localStorage.setItem('styleai_wardrobe_' + uname, JSON.stringify(wardrobeRow?.items || []));
-  localStorage.setItem('styleai_saved_outfits_' + uname, JSON.stringify(outfitsRow?.outfits || []));
-  localStorage.setItem('styleai_calendar_' + uname, JSON.stringify(calRow?.entries || []));
+
+  if (!wardrobeRes.error) {
+    localStorage.setItem('styleai_wardrobe_' + uname, JSON.stringify(wardrobeRes.data?.items || []));
+  } else {
+    console.warn('[cloud-sync] wardrobe read failed — keeping whatever is cached locally', wardrobeRes.error);
+  }
+  if (!outfitsRes.error) {
+    localStorage.setItem('styleai_saved_outfits_' + uname, JSON.stringify(outfitsRes.data?.outfits || []));
+  } else {
+    console.warn('[cloud-sync] saved_outfits read failed — keeping whatever is cached locally', outfitsRes.error);
+  }
+  if (!calRes.error) {
+    localStorage.setItem('styleai_calendar_' + uname, JSON.stringify(calRes.data?.entries || []));
+  } else {
+    console.warn('[cloud-sync] calendar read failed — keeping whatever is cached locally', calRes.error);
+  }
 
   // NOTE: subscription/trial status is still tracked (see window.__currentUser
   // .subscriptionActive / .trialActive) and pages/upgrade.html still works as
@@ -180,25 +193,28 @@ window.dispatchEvent(new Event('cloud-ready'));
 
 window.cloudSync = {
   async pushWardrobe(_username, items) {
-    if (!window.__currentUser) return;
+    if (!window.__currentUser) return false;
     const { error } = await window.supabaseClient
       .from('wardrobe')
       .upsert({ user_id: window.__currentUser.id, items, updated_at: new Date().toISOString() });
-    if (error) console.warn('[cloud-sync] wardrobe push failed', error);
+    if (error) { console.warn('[cloud-sync] wardrobe push failed', error); return false; }
+    return true;
   },
   async pushSavedOutfits(_username, outfits) {
-    if (!window.__currentUser) return;
+    if (!window.__currentUser) return false;
     const { error } = await window.supabaseClient
       .from('saved_outfits')
       .upsert({ user_id: window.__currentUser.id, outfits, updated_at: new Date().toISOString() });
-    if (error) console.warn('[cloud-sync] saved_outfits push failed', error);
+    if (error) { console.warn('[cloud-sync] saved_outfits push failed', error); return false; }
+    return true;
   },
   async pushCalendar(_username, entries) {
-    if (!window.__currentUser) return;
+    if (!window.__currentUser) return false;
     const { error } = await window.supabaseClient
       .from('calendar_entries')
       .upsert({ user_id: window.__currentUser.id, entries, updated_at: new Date().toISOString() });
-    if (error) console.warn('[cloud-sync] calendar push failed', error);
+    if (error) { console.warn('[cloud-sync] calendar push failed', error); return false; }
+    return true;
   },
   // Uploads a base64 dataURL to the "avatars" Storage bucket and returns a public URL.
   async uploadPhoto(dataUrl, kind) {

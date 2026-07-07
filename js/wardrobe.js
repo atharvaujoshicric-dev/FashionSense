@@ -28,16 +28,22 @@ function _load() {
   } catch { return []; }
 }
 
-function _save() {
+async function _save() {
   try {
     localStorage.setItem('styleai_wardrobe_' + _wUser.username, JSON.stringify(_wItems));
-    window.cloudSync?.pushWardrobe(_wUser.username, _wItems);
-    return true;
   } catch (e) {
     showToast('Storage full — try a smaller photo or remove old items', 'error');
     console.warn('wardrobe save failed:', e);
     return false;
   }
+
+  if (window.cloudSync) {
+    const synced = await window.cloudSync.pushWardrobe(_wUser.username, _wItems);
+    if (!synced) {
+      showToast('Saved on this device, but couldn\u2019t sync to your account — check your connection', 'error');
+    }
+  }
+  return true;
 }
 
 // ── Grid render ───────────────────────────────────────────────────────────────
@@ -233,7 +239,7 @@ function _syncSubtypes() {
 
 // ── Save item ─────────────────────────────────────────────────────────────────
 
-function saveClothingItem() {
+async function saveClothingItem() {
   const category = document.getElementById('upload-category').value;
   const subtype  = document.getElementById('upload-subtype').value;
   const custom   = (document.getElementById('upload-color-custom').value || '').trim();
@@ -252,7 +258,12 @@ function saveClothingItem() {
   };
 
   _wItems.push(item);
-  const ok = _save();
+  const btn = document.getElementById('save-item-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  const ok = await _save();
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Add Item'; }
 
   if (ok) {
     closeUploadModal();
@@ -294,11 +305,11 @@ function closeItemModal() {
   _wItemId = null;
 }
 
-function deleteCurrentItem() {
+async function deleteCurrentItem() {
   if (!_wItemId) return;
   if (!confirm('Remove this item from your wardrobe?')) return;
   _wItems = _wItems.filter(i => i.id !== _wItemId);
-  _save();
+  await _save();
   closeItemModal();
   _render();
   showToast('Item removed');

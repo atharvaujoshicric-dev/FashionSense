@@ -67,7 +67,18 @@ function _getDominantRGB(img) {
   // willReadFrequently hint (Chrome 97+)
   // Re-get context with hint if possible
   const ctx2 = canvas.getContext('2d', { willReadFrequently: true }) || ctx;
-  ctx2.drawImage(img, 0, 0, SIZE, SIZE);
+
+  // Sample only the centered ~55% of the photo. Garment photos are almost
+  // always centered in the frame, with background/table/hanger more likely
+  // to show up near the edges — sampling the whole image was frequently
+  // picking up that background instead of the garment itself.
+  const sw = img.naturalWidth  || img.width;
+  const sh = img.naturalHeight || img.height;
+  const cropFrac = 0.55;
+  const cw = sw * cropFrac, ch = sh * cropFrac;
+  const sx = (sw - cw) / 2, sy = (sh - ch) / 2;
+
+  ctx2.drawImage(img, sx, sy, cw, ch, 0, 0, SIZE, SIZE);
 
   let data;
   try {
@@ -76,7 +87,9 @@ function _getDominantRGB(img) {
     throw new Error('Canvas tainted: ' + e.message);
   }
 
-  // Bucket pixels — skip near-white background and near-black shadows
+  // Bucket pixels — only skip truly blown-out highlights / crushed shadows,
+  // not genuine white/black garments (the old 235/12 thresholds were wide
+  // enough to throw out most pixels of an actual white or black item).
   const buckets = {};
   let   total   = 0;
 
@@ -84,10 +97,9 @@ function _getDominantRGB(img) {
     const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
     if (a < 128) continue;
 
-    // Skip background-ish pixels
     const brightness = (r + g + b) / 3;
-    if (brightness > 235) continue; // near white
-    if (brightness < 12)  continue; // near black
+    if (brightness > 251) continue; // paper-white blowout only
+    if (brightness < 6)   continue; // crushed-black only
 
     // Quantize to reduce noise (bin to nearest 20)
     const qr = Math.round(r / 20) * 20;

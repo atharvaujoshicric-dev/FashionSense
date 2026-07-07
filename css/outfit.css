@@ -37,7 +37,7 @@
 }
 
 .btn-generate {
-  background: linear-gradient(135deg, var(--accent) 0%, #dd6478 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #7186e6 100%);
   color: var(--on-accent);
   border: none;
   border-radius: var(--radius-xl);
@@ -52,12 +52,12 @@
   gap: 0.6rem;
   margin: 0 auto;
   transition: all 0.2s;
-  box-shadow: 0 4px 20px rgba(194,69,91,0.3);
+  box-shadow: 0 4px 20px rgba(79,99,210,0.3);
 }
 
 .btn-generate:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 10px rgba(194,69,91,0.2);
+  box-shadow: 0 2px 10px rgba(79,99,210,0.2);
 }
 
 .generate-icon { font-size: 1.2rem; }
@@ -294,7 +294,7 @@
 .btn-save-outfit {
   background: var(--accent-dim);
   color: var(--accent);
-  border: 1px solid rgba(194,69,91,0.3);
+  border: 1px solid rgba(79,99,210,0.3);
   border-radius: 100px;
   padding: 0.4rem 1rem;
   font-family: 'DM Sans', sans-serif;

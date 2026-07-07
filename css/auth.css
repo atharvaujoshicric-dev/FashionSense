@@ -16,9 +16,9 @@
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(194,69,91,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(194,69,91,0.06) 0%, transparent 50%),
-    linear-gradient(180deg, #1b1620 0%, #241d2b 100%);
+    radial-gradient(ellipse at 20% 50%, rgba(79,99,210,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(79,99,210,0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #15171c 0%, #1e2129 100%);
   z-index: 0;
 }
 
@@ -83,7 +83,7 @@
   min-height: 100vh;
   padding: 1rem 1.5rem 2rem;
   background:
-    radial-gradient(ellipse at 80% 0%, rgba(194,69,91,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(79,99,210,0.08) 0%, transparent 50%),
     var(--bg);
 }
 
@@ -134,7 +134,7 @@
 .btn-demo {
   background: var(--bg-elevated);
   color: var(--accent);
-  border: 1px dashed rgba(194,69,91,0.5);
+  border: 1px dashed rgba(79,99,210,0.5);
   border-radius: var(--radius);
   padding: 0.85rem 1.4rem;
   font-family: 'DM Sans', sans-serif;
@@ -172,7 +172,7 @@
 
 .demo-hint-box {
   background: var(--accent-glow);
-  border: 1px solid rgba(194,69,91,0.25);
+  border: 1px solid rgba(79,99,210,0.25);
   border-radius: var(--radius-sm);
   padding: 0.65rem 1rem;
   font-size: 0.82rem;
@@ -181,7 +181,7 @@
 }
 .demo-hint-box code {
   color: var(--accent);
-  background: rgba(194,69,91,0.15);
+  background: rgba(79,99,210,0.15);
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
 }

@@ -4,28 +4,28 @@
    ========================================== */
 
 :root {
-  /* Color palette — aubergine dusk + berry accent */
-  --bg: #1b1620;
-  --bg-card: #241d2b;
-  --bg-elevated: #2c2333;
-  --bg-input: #2a2130;
-  --border: #3a2e42;
-  --border-light: #4a3b53;
+  /* Color palette — graphite neutrals + indigo accent */
+  --bg: #15171c;
+  --bg-card: #1e2129;
+  --bg-elevated: #262a33;
+  --bg-input: #262a33;
+  --border: #333844;
+  --border-light: #444a58;
 
-  --text-primary: #f3ece6;
-  --text-secondary: #b7a8b9;
-  --text-muted: #7b6c7d;
+  --text-primary: #f2f3f5;
+  --text-secondary: #a3a8b4;
+  --text-muted: #6b7280;
 
-  --accent: #c2455b;        /* deep berry — StyleAI signature */
-  --accent-light: #dd6478;
-  --accent-dim: rgba(194,69,91,0.15);
-  --accent-glow: rgba(194,69,91,0.08);
-  --on-accent: #fbf3ef;     /* text/icon color when sitting on a solid --accent fill */
+  --accent: #4f63d2;        /* refined indigo — StyleAI signature */
+  --accent-light: #7186e6;
+  --accent-dim: rgba(79,99,210,0.15);
+  --accent-glow: rgba(79,99,210,0.08);
+  --on-accent: #fbfbfe;     /* text/icon color when sitting on a solid --accent fill */
 
-  --red: #e2654a;
-  --red-dim: rgba(226,101,74,0.15);
-  --green: #7fae7a;
-  --green-dim: rgba(127,174,122,0.15);
+  --red: #e5484d;
+  --red-dim: rgba(229,72,77,0.15);
+  --green: #4caf7d;
+  --green-dim: rgba(76,175,125,0.15);
 
   --radius-sm: 10px;
   --radius: 16px;
@@ -34,7 +34,7 @@
 
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
   --shadow: 0 8px 32px rgba(0,0,0,0.6);
-  --shadow-glow: 0 0 24px rgba(194,69,91,0.2);
+  --shadow-glow: 0 0 24px rgba(79,99,210,0.2);
 
   --nav-height: 68px;
   --topbar-height: 56px;
@@ -158,7 +158,7 @@ select option {
 .btn-danger {
   background: var(--red-dim);
   color: var(--red);
-  border: 1px solid rgba(226,101,74,0.3);
+  border: 1px solid rgba(229,72,77,0.3);
   border-radius: var(--radius);
   padding: 0.9rem 1.8rem;
   font-family: 'DM Sans', sans-serif;
@@ -171,7 +171,7 @@ select option {
 .btn-danger-outline {
   background: transparent;
   color: var(--red);
-  border: 1px solid rgba(226,101,74,0.4);
+  border: 1px solid rgba(229,72,77,0.4);
   border-radius: var(--radius);
   padding: 0.9rem 1.8rem;
   font-family: 'DM Sans', sans-serif;
@@ -249,7 +249,7 @@ select option {
   justify-content: space-between;
   padding: 0 1rem;
   height: var(--topbar-height);
-  background: rgba(27,22,32,0.95);
+  background: rgba(21,23,28,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -311,7 +311,7 @@ select option {
   justify-content: space-around;
   height: calc(var(--nav-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
-  background: rgba(27,22,32,0.97);
+  background: rgba(21,23,28,0.97);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
 }
@@ -386,8 +386,9 @@ select option {
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   padding: 1rem 1.25rem 2rem;
   width: 100%;
-  max-height: 90vh;
+  max-height: 92vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   animation: slideUp 0.25s ease;
 }
 
@@ -442,7 +443,7 @@ select option {
 .trending-pill {
   background: var(--accent-dim);
   color: var(--accent);
-  border: 1px solid rgba(194,69,91,0.3);
+  border: 1px solid rgba(79,99,210,0.3);
   border-radius: 100px;
   padding: 0.2rem 0.7rem;
   font-size: 0.72rem;
@@ -555,13 +556,15 @@ select option {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 0.9rem 1rem;
+  padding: 1rem 1.1rem;
   cursor: pointer;
   text-align: left;
   width: 100%;
   transition: border-color 0.15s, background 0.15s;
   font-family: 'DM Sans', sans-serif;
 }
+
+.picker-option:active { border-color: var(--accent); }
 
 .picker-option:active {
   background: var(--accent-dim);
@@ -642,22 +645,7 @@ select option {
   gap: 0.5rem;
 }
 
-.picker-option {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem 1.1rem;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.15s;
-  width: 100%;
-  font-family: 'DM Sans', sans-serif;
-}
 
-.picker-option:active { border-color: var(--accent); }
 
 .picker-option-icon { font-size: 1.6rem; flex-shrink: 0; }
 
@@ -685,38 +673,38 @@ select option {
    ========================================== */
 
 [data-theme="light"] {
-  --bg:           #f5ede9;
+  --bg:           #f7f7f9;
   --bg-card:      #ffffff;
-  --bg-elevated:  #efe1db;
-  --bg-input:     #e8e4de;
-  --border:       #e0cfc6;
-  --border-light: #d3beb2;
+  --bg-elevated:  #eef0f4;
+  --bg-input:     #e4e7ec;
+  --border:       #dfe2e8;
+  --border-light: #c9ced8;
 
-  --text-primary:   #241823;
-  --text-secondary: #6b5a66;
-  --text-muted:     #a8969f;
+  --text-primary:   #14161a;
+  --text-secondary: #565b66;
+  --text-muted:     #8b909b;
 
-  --accent:       #a6304a;
-  --accent-light: #c24b63;
-  --accent-dim:   rgba(166,48,74,0.12);
-  --accent-glow:  rgba(166,48,74,0.06);
-  --on-accent:    #fbf3ef;
+  --accent:       #3a4dc0;
+  --accent-light: #5266d6;
+  --accent-dim:   rgba(58,77,192,0.12);
+  --accent-glow:  rgba(58,77,192,0.06);
+  --on-accent:    #fbfbfe;
 
   --shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
   --shadow:     0 8px 32px rgba(0,0,0,0.12);
-  --shadow-glow:0 0 24px rgba(166,48,74,0.15);
+  --shadow-glow:0 0 24px rgba(58,77,192,0.15);
 }
 
 [data-theme="light"] .topbar {
-  background: rgba(245,237,233,0.95);
+  background: rgba(247,247,249,0.95);
 }
 [data-theme="light"] .bottom-nav {
-  background: rgba(239,225,219,0.97);
+  background: rgba(238,240,244,0.97);
 }
 [data-theme="light"] .splash-bg {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(166,48,74,0.10) 0%, transparent 60%),
-    linear-gradient(180deg, #f5ede9 0%, #efe1db 100%);
+    radial-gradient(ellipse at 20% 50%, rgba(58,77,192,0.10) 0%, transparent 60%),
+    linear-gradient(180deg, #f7f7f9 0%, #eef0f4 100%);
 }
 
 /* ==========================================
@@ -743,12 +731,6 @@ html, body { max-width: 100%; overflow-x: hidden; }
 .occasion-bar::-webkit-scrollbar { display: none; }
 
 /* Ensure modals don't overflow */
-.modal-sheet {
-  max-height: 92vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
 /* Fix form inputs on iOS — prevent zoom on focus */
 input[type="text"],
 input[type="password"],

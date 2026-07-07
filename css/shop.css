@@ -100,9 +100,9 @@
   letter-spacing: 0.07em;
 }
 
-.shop-card-type-badge.essential { background: rgba(27,22,32,0.8); color: var(--accent); }
-.shop-card-type-badge.trending  { background: rgba(27,22,32,0.8); color: var(--green);  }
-.shop-card-type-badge.upgrade   { background: rgba(27,22,32,0.8); color: #6ea0c9;       }
+.shop-card-type-badge.essential { background: rgba(21,23,28,0.8); color: var(--accent); }
+.shop-card-type-badge.trending  { background: rgba(21,23,28,0.8); color: var(--green);  }
+.shop-card-type-badge.upgrade   { background: rgba(21,23,28,0.8); color: #6ea0c9;       }
 
 /* Card body */
 .shop-card-body {

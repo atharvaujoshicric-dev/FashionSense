@@ -138,12 +138,13 @@
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 0.55rem 0.85rem;
+  padding: 0.6rem 0.85rem;
   font-size: 0.82rem;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .autodetect-spinner { color: var(--text-muted); }
@@ -197,11 +198,4 @@
   border-radius: 50%;
   border: 1px solid rgba(255,255,255,0.2);
   display: inline-block;
-}
-
-/* Autodetect banner flex display fix */
-.autodetect-banner {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
 }
