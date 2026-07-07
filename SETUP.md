@@ -95,7 +95,29 @@ Razorpay is the standard choice for INR/UPI recurring billing in India
    from the database (`drop function public.mock_activate_subscription;`)
    so the free-unlock loophole is gone.
 
-## Known limitations to be aware of
+## Troubleshooting "can't log in"
+
+The app now shows a clear on-screen message instead of silently
+bouncing back to the login page. The most common causes, in order:
+
+1. **`js/supabase-client.js` still has placeholder values** — the app
+   will say so directly. Fill in your real URL/key (step 5).
+2. **"Confirm email" is still ON** in Supabase (it's on by default) —
+   registering or using Demo Login will create the account but *not*
+   sign you in, since Supabase is waiting for an email confirmation
+   that can never arrive (the address is a fake `@styleai.local` one).
+   Turn it off per step 4, then try again.
+3. **`supabase/schema.sql` wasn't run**, or was only partially run — the
+   error banner will say "Could not load your account" with the
+   underlying database error. Re-run the SQL file.
+4. **Wrong Storage bucket name** — photo uploads need a bucket named
+   exactly `avatars`, set to Public.
+
+If you still see something confusing, open the browser console
+(F12 → Console) — every failure is logged there with detail beyond
+what's shown on screen.
+
+
 
 - **Login is username-based**, mapped internally to a fake email
   address. Password-reset-by-email won't work until you collect real

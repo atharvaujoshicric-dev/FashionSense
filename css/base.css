@@ -4,27 +4,28 @@
    ========================================== */
 
 :root {
-  /* Color palette — dark luxury */
-  --bg: #0a0a0f;
-  --bg-card: #13131a;
-  --bg-elevated: #1a1a24;
-  --bg-input: #1f1f2e;
-  --border: #2a2a3a;
-  --border-light: #333348;
+  /* Color palette — aubergine dusk + berry accent */
+  --bg: #1b1620;
+  --bg-card: #241d2b;
+  --bg-elevated: #2c2333;
+  --bg-input: #2a2130;
+  --border: #3a2e42;
+  --border-light: #4a3b53;
 
-  --text-primary: #f0efe8;
-  --text-secondary: #9898b0;
-  --text-muted: #5a5a72;
+  --text-primary: #f3ece6;
+  --text-secondary: #b7a8b9;
+  --text-muted: #7b6c7d;
 
-  --accent: #c9a96e;        /* warm gold */
-  --accent-light: #e2c898;
-  --accent-dim: rgba(201,169,110,0.15);
-  --accent-glow: rgba(201,169,110,0.08);
+  --accent: #c2455b;        /* deep berry — StyleAI signature */
+  --accent-light: #dd6478;
+  --accent-dim: rgba(194,69,91,0.15);
+  --accent-glow: rgba(194,69,91,0.08);
+  --on-accent: #fbf3ef;     /* text/icon color when sitting on a solid --accent fill */
 
-  --red: #e05c5c;
-  --red-dim: rgba(224,92,92,0.15);
-  --green: #6ec98a;
-  --green-dim: rgba(110,201,138,0.15);
+  --red: #e2654a;
+  --red-dim: rgba(226,101,74,0.15);
+  --green: #7fae7a;
+  --green-dim: rgba(127,174,122,0.15);
 
   --radius-sm: 10px;
   --radius: 16px;
@@ -33,7 +34,7 @@
 
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
   --shadow: 0 8px 32px rgba(0,0,0,0.6);
-  --shadow-glow: 0 0 24px rgba(201,169,110,0.2);
+  --shadow-glow: 0 0 24px rgba(194,69,91,0.2);
 
   --nav-height: 68px;
   --topbar-height: 56px;
@@ -106,7 +107,7 @@ select option {
 
 .btn-primary {
   background: var(--accent);
-  color: #0a0a0f;
+  color: var(--on-accent);
   border: none;
   border-radius: var(--radius);
   padding: 0.9rem 1.8rem;
@@ -156,7 +157,7 @@ select option {
 .btn-danger {
   background: var(--red-dim);
   color: var(--red);
-  border: 1px solid rgba(224,92,92,0.3);
+  border: 1px solid rgba(226,101,74,0.3);
   border-radius: var(--radius);
   padding: 0.9rem 1.8rem;
   font-family: 'DM Sans', sans-serif;
@@ -169,7 +170,7 @@ select option {
 .btn-danger-outline {
   background: transparent;
   color: var(--red);
-  border: 1px solid rgba(224,92,92,0.4);
+  border: 1px solid rgba(226,101,74,0.4);
   border-radius: var(--radius);
   padding: 0.9rem 1.8rem;
   font-family: 'DM Sans', sans-serif;
@@ -440,7 +441,7 @@ select option {
 .trending-pill {
   background: var(--accent-dim);
   color: var(--accent);
-  border: 1px solid rgba(201,169,110,0.3);
+  border: 1px solid rgba(194,69,91,0.3);
   border-radius: 100px;
   padding: 0.2rem 0.7rem;
   font-size: 0.72rem;
@@ -683,25 +684,26 @@ select option {
    ========================================== */
 
 [data-theme="light"] {
-  --bg:           #f5f3ef;
+  --bg:           #f5ede9;
   --bg-card:      #ffffff;
-  --bg-elevated:  #ede9e3;
+  --bg-elevated:  #efe1db;
   --bg-input:     #e8e4de;
-  --border:       #d4cfc8;
-  --border-light: #c8c2bb;
+  --border:       #e0cfc6;
+  --border-light: #d3beb2;
 
-  --text-primary:   #1a1814;
-  --text-secondary: #5a5650;
-  --text-muted:     #9a9590;
+  --text-primary:   #241823;
+  --text-secondary: #6b5a66;
+  --text-muted:     #a8969f;
 
-  --accent:       #9a6f30;
-  --accent-light: #b8892e;
-  --accent-dim:   rgba(154,111,48,0.12);
-  --accent-glow:  rgba(154,111,48,0.06);
+  --accent:       #a6304a;
+  --accent-light: #c24b63;
+  --accent-dim:   rgba(166,48,74,0.12);
+  --accent-glow:  rgba(166,48,74,0.06);
+  --on-accent:    #fbf3ef;
 
   --shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
   --shadow:     0 8px 32px rgba(0,0,0,0.12);
-  --shadow-glow:0 0 24px rgba(154,111,48,0.15);
+  --shadow-glow:0 0 24px rgba(166,48,74,0.15);
 }
 
 [data-theme="light"] .topbar {
@@ -712,8 +714,8 @@ select option {
 }
 [data-theme="light"] .splash-bg {
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(154,111,48,0.10) 0%, transparent 60%),
-    linear-gradient(180deg, #f5f3ef 0%, #ede9e3 100%);
+    radial-gradient(ellipse at 20% 50%, rgba(166,48,74,0.10) 0%, transparent 60%),
+    linear-gradient(180deg, #f5ede9 0%, #efe1db 100%);
 }
 
 /* ==========================================

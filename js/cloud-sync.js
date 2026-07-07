@@ -28,10 +28,10 @@ function injectLoader(msg) {
   const el = document.createElement('div');
   el.id = 'cloud-sync-loader';
   el.style.cssText = `
-    position:fixed; inset:0; z-index:99999; background:#0f1210; color:#f1ece2;
+    position:fixed; inset:0; z-index:99999; background:#1b1620; color:#f3ece6;
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     gap:10px; font:500 14px system-ui,sans-serif; letter-spacing:.02em;`;
-  el.innerHTML = `<div style="width:26px;height:26px;border-radius:999px;border:3px solid rgba(241,236,226,.25);border-top-color:#f1ece2;animation:cs-spin 0.8s linear infinite"></div><div>${msg}</div>
+  el.innerHTML = `<div style="width:26px;height:26px;border-radius:999px;border:3px solid rgba(243,236,230,.25);border-top-color:#c2455b;animation:cs-spin 0.8s linear infinite"></div><div>${msg}</div>
     <style>@keyframes cs-spin{to{transform:rotate(360deg)}}</style>`;
   document.documentElement.appendChild(el);
   return el;
@@ -42,8 +42,37 @@ function removeLoader() {
 
 const loader = injectLoader('Loading your wardrobe…');
 
+function showFatalError(title, detail) {
+  const el = document.getElementById('cloud-sync-loader');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="max-width:320px; text-align:center; padding:0 20px;">
+      <div style="font-size:22px; margin-bottom:8px;">⚠️</div>
+      <div style="font-weight:600; margin-bottom:6px;">${title}</div>
+      <div style="font-size:12.5px; opacity:.75; line-height:1.5;">${detail}</div>
+      <button onclick="location.reload()" style="margin-top:16px; background:#c2455b; color:#fbf3ef; border:none; padding:9px 16px; border-radius:999px; font-weight:600; font-size:13px; cursor:pointer;">Retry</button>
+      <div style="margin-top:10px;"><a href="${IS_PROTECTED ? '../index.html' : 'index.html'}" style="color:#f3ece6; font-size:12px; text-decoration:underline;">Back to login</a></div>
+    </div>`;
+  window.__cloudSyncError = title;
+}
+
 async function hydrate() {
-  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (!window.__supabaseConfigured) {
+    showFatalError(
+      'Supabase isn\u2019t connected yet',
+      'Open js/supabase-client.js and paste in your Project URL and anon key from the Supabase dashboard (Settings \u2192 API), then reload.'
+    );
+    return;
+  }
+
+  let session;
+  try {
+    ({ data: { session } } = await window.supabaseClient.auth.getSession());
+  } catch (e) {
+    showFatalError('Could not reach Supabase', 'Check your internet connection and that the URL in js/supabase-client.js is correct.');
+    console.error(e);
+    return;
+  }
 
   if (!session) {
     if (IS_PROTECTED) { window.location.href = '../index.html'; return; }
@@ -53,18 +82,39 @@ async function hydrate() {
 
   const uid = session.user.id;
 
-  let [{ data: profile }, { data: wardrobeRow }, { data: outfitsRow }, { data: calRow }] = await Promise.all([
-    window.supabaseClient.from('profiles').select('*').eq('id', uid).maybeSingle(),
-    window.supabaseClient.from('wardrobe').select('items').eq('user_id', uid).maybeSingle(),
-    window.supabaseClient.from('saved_outfits').select('outfits').eq('user_id', uid).maybeSingle(),
-    window.supabaseClient.from('calendar_entries').select('entries').eq('user_id', uid).maybeSingle(),
-  ]);
+  let profile, wardrobeRow, outfitsRow, calRow;
+  try {
+    let profileRes, wardrobeRes, outfitsRes, calRes;
+    [profileRes, wardrobeRes, outfitsRes, calRes] = await Promise.all([
+      window.supabaseClient.from('profiles').select('*').eq('id', uid).maybeSingle(),
+      window.supabaseClient.from('wardrobe').select('items').eq('user_id', uid).maybeSingle(),
+      window.supabaseClient.from('saved_outfits').select('outfits').eq('user_id', uid).maybeSingle(),
+      window.supabaseClient.from('calendar_entries').select('entries').eq('user_id', uid).maybeSingle(),
+    ]);
+    if (profileRes.error) throw profileRes.error;
+    profile = profileRes.data; wardrobeRow = wardrobeRes.data; outfitsRow = outfitsRes.data; calRow = calRes.data;
+  } catch (e) {
+    showFatalError(
+      'Could not load your account',
+      'This usually means supabase/schema.sql hasn\u2019t been run yet in your Supabase project\u2019s SQL Editor. Details: ' + (e?.message || e)
+    );
+    console.error(e);
+    return;
+  }
 
   // The signup DB trigger creates these rows, but on a very fresh signup
   // there can be a brief race — retry once after a short pause.
   if (!profile) {
     await new Promise((r) => setTimeout(r, 900));
     ({ data: profile } = await window.supabaseClient.from('profiles').select('*').eq('id', uid).maybeSingle());
+  }
+
+  if (!profile) {
+    showFatalError(
+      'Your profile row is missing',
+      'Signup succeeded but no profile was created. Make sure the "on_auth_user_created" trigger from supabase/schema.sql exists (SQL Editor \u2192 check for handle_new_user).'
+    );
+    return;
   }
 
   const p = profile || {};
