@@ -56,19 +56,28 @@ receive mail.
 
 ## Free trial & the paywall
 
-Every new signup gets a **7-day free trial** (`profiles.trial_ends_at`).
-After that, every page except Profile redirects to `pages/upgrade.html`
-until the person subscribes. The demo account never sees the paywall.
+**Enforcement is currently switched off.** Every signed-up user gets
+full access to the app immediately — no trial countdown, no forced
+redirect. This was a deliberate choice while you're onboarding early
+users: get people in and using it first, add billing pressure later.
 
-Right now, the **Subscribe** button calls a Supabase function called
-`mock_activate_subscription()` that flips a switch with **no real
-payment** — this is intentionally there so you can build and demo the
-whole flow before your payment gateway is ready. Anyone who knows to
-call that function from the browser console could unlock a free plan,
-so:
+The subscribe flow still fully exists and works, it's just optional:
+- **Profile → Manage Plan** takes anyone to `pages/upgrade.html`.
+- Clicking **Subscribe** there calls a Supabase function called
+  `mock_activate_subscription()` that flips a switch with **no real
+  payment** — it's there so you can build/demo/test the whole flow
+  before your payment gateway exists.
 
-> ⚠️ **Do not announce this publicly or take real signups at scale until
-> you replace the mock activation with real, server-verified billing.**
+When you're ready to actually require payment, open `js/cloud-sync.js`
+and uncomment the block right after the `window.__currentUser` object
+is built (it's clearly marked) — that's the single place that redirects
+non-paying users to `upgrade.html`.
+
+> ⚠️ Because there's no gating yet, `mock_activate_subscription` being
+> callable from the browser console isn't a pressing risk right now —
+> but treat it as a placeholder either way. Replace it with real,
+> server-verified Razorpay billing (below) before you turn enforcement
+> back on and start actually charging people.
 
 ## Going live with real billing (Razorpay)
 

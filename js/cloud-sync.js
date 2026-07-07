@@ -146,11 +146,16 @@ async function hydrate() {
   localStorage.setItem('styleai_saved_outfits_' + uname, JSON.stringify(outfitsRow?.outfits || []));
   localStorage.setItem('styleai_calendar_' + uname, JSON.stringify(calRow?.entries || []));
 
-  const hasAccess = !!p.is_demo || trialActive || subActive;
-  if (IS_PROTECTED && !hasAccess && !ALWAYS_ALLOWED.includes(CURRENT_FILE)) {
-    window.location.href = 'upgrade.html';
-    return;
-  }
+  // NOTE: subscription/trial status is still tracked (see window.__currentUser
+  // .subscriptionActive / .trialActive) and pages/upgrade.html still works as
+  // a dummy "Subscribe" flow you can test — it's just not required to use
+  // the app. Re-enable enforcement later by uncommenting the block below.
+  //
+  // const hasAccess = !!p.is_demo || trialActive || subActive;
+  // if (IS_PROTECTED && !hasAccess && !ALWAYS_ALLOWED.includes(CURRENT_FILE)) {
+  //   window.location.href = 'upgrade.html';
+  //   return;
+  // }
 
   removeLoader();
 }
