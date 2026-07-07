@@ -148,6 +148,7 @@ function saveCurrentOutfit() {
   saved.unshift(entry);
   if (saved.length > 20) saved = saved.slice(0, 20);
   try { localStorage.setItem(key, JSON.stringify(saved)); } catch {}
+  window.cloudSync?.pushSavedOutfits(currentUser?.username, saved);
 
   document.getElementById('save-outfit-btn').textContent = '✓ Saved!';
   showToast('Look saved ✦');
@@ -187,12 +188,14 @@ function deleteSavedOutfit(id) {
   try { saved = JSON.parse(localStorage.getItem(key)) || []; } catch {}
   saved = saved.filter(s => s.id !== id);
   try { localStorage.setItem(key, JSON.stringify(saved)); } catch {}
+  window.cloudSync?.pushSavedOutfits(currentUser?.username, saved);
   renderSavedOutfits();
 }
 
 function clearSavedOutfits() {
   if (!confirm('Clear all saved looks?')) return;
   localStorage.removeItem('styleai_saved_outfits_' + currentUser.username);
+  window.cloudSync?.pushSavedOutfits(currentUser?.username, []);
   renderSavedOutfits();
 }
 

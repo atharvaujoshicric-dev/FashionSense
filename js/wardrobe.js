@@ -31,6 +31,7 @@ function _load() {
 function _save() {
   try {
     localStorage.setItem('styleai_wardrobe_' + _wUser.username, JSON.stringify(_wItems));
+    window.cloudSync?.pushWardrobe(_wUser.username, _wItems);
     return true;
   } catch (e) {
     showToast('Storage full — try a smaller photo or remove old items', 'error');

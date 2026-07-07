@@ -32,7 +32,10 @@ function _loadCal() {
 }
 
 function _saveCal() {
-  try { localStorage.setItem(CAL_KEY(_calUser.username), JSON.stringify(_calData)); }
+  try {
+    localStorage.setItem(CAL_KEY(_calUser.username), JSON.stringify(_calData));
+    window.cloudSync?.pushCalendar(_calUser.username, _calData);
+  }
   catch { showToast('Could not save — storage full', 'error'); }
 }
 

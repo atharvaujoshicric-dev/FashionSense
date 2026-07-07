@@ -1,129 +1,91 @@
 /* ==========================================
-   AUTH.JS — Authentication & User Management
+   AUTH.JS — Authentication (Supabase-backed)
+   ------------------------------------------
+   Real server-side auth: Supabase hashes and checks passwords,
+   issues a JWT session, and Postgres Row Level Security makes
+   sure a user can only ever read/write their OWN rows — none of
+   that was true of the old localStorage version.
+
+   The UI still only asks for a "username" (no email field), so
+   under the hood each username maps to a synthetic address
+   "<username>@styleai.local". That keeps every existing screen
+   working unchanged. Swap this for real email collection later
+   if you want password-reset emails to work.
    ========================================== */
 
-const AUTH_KEY    = 'styleai_users';
-const SESSION_KEY = 'styleai_session';
-
-// Large images stored in separate keys to avoid blowing the users-object quota
-function _bodyPhotoKey(u)   { return 'styleai_body_photo_'    + u; }
-function _profilePhotoKey(u){ return 'styleai_profile_photo_' + u; }
-
-// ── Demo account ──────────────────────────────────────────────────────────────
-
-const DEMO_USER = {
-  name: 'Demo User', username: 'demo',
-  password: btoa('demo123'),
-  city: 'Mumbai', gender: 'male', bodyType: 'athletic', faceShape: 'oval',
-  isDemo: true, createdAt: 0
-};
-
-function seedDemoAccount() {
-  const users = getUsers();
-  if (!users['demo']) { users['demo'] = DEMO_USER; saveUsers(users); }
+function _emailForUsername(username) {
+  return username.toLowerCase().trim() + '@styleai.local';
 }
 
-// ── Storage ───────────────────────────────────────────────────────────────────
-
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem(AUTH_KEY)) || {}; }
-  catch { return {}; }
-}
-
-function saveUsers(users) {
-  try { localStorage.setItem(AUTH_KEY, JSON.stringify(users)); }
-  catch (e) { console.warn('saveUsers failed:', e); }
-}
+// ── Session-derived user (populated by cloud-sync.js before this runs) ────────
 
 function getCurrentUser() {
-  try {
-    const session = JSON.parse(localStorage.getItem(SESSION_KEY));
-    if (!session) return null;
-    const users = getUsers();
-    const user  = users[session.username];
-    if (!user) return null;
-    // Attach large photos from their own keys
-    user.bodyPhoto    = localStorage.getItem(_bodyPhotoKey(user.username))    || null;
-    user.profilePhoto = localStorage.getItem(_profilePhotoKey(user.username)) || null;
-    return user;
-  } catch { return null; }
+  return window.__currentUser || null;
 }
 
-function setSession(username) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ username, ts: Date.now() }));
+function requireAuth() {
+  if (!window.__currentUser) {
+    const inPages = window.location.pathname.includes('/pages/');
+    window.location.href = inPages ? '../index.html' : 'index.html';
+    return null;
+  }
+  return window.__currentUser;
 }
 
-function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
-}
+// ── Profile updates (photos go to Supabase Storage, fields to `profiles`) ─────
 
-/**
- * updateCurrentUser — saves profile fields.
- * bodyPhoto and profilePhoto are stored in their own keys (large base64).
- */
-function updateCurrentUser(updates) {
-  const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-  if (!session) return null;
+async function updateCurrentUser(updates) {
+  if (!window.__currentUser) return null;
+  const { bodyPhoto, profilePhoto, avatarConfig, ...rest } = updates;
+  const dbPatch = {};
 
-  const users = getUsers();
-  if (!users[session.username]) return null;
+  if (rest.name !== undefined) dbPatch.name = rest.name;
+  if (rest.city !== undefined) dbPatch.city = rest.city;
+  if (rest.gender !== undefined) dbPatch.gender = rest.gender;
+  if (rest.bodyType !== undefined) dbPatch.body_type = rest.bodyType;
+  if (rest.faceShape !== undefined) dbPatch.face_shape = rest.faceShape;
+  if (avatarConfig !== undefined) dbPatch.avatar_config = avatarConfig;
 
-  // Extract large photo fields before saving to users object
-  const { bodyPhoto, profilePhoto, ...profileUpdates } = updates;
-
-  // Store body photo separately
   if (bodyPhoto !== undefined) {
-    try {
-      bodyPhoto
-        ? localStorage.setItem(_bodyPhotoKey(session.username), bodyPhoto)
-        : localStorage.removeItem(_bodyPhotoKey(session.username));
-    } catch (e) {
-      console.warn('bodyPhoto save failed:', e);
-      if (typeof showToast === 'function') showToast('Photo too large — try a smaller image', 'error');
-    }
+    const url = bodyPhoto ? await window.cloudSync.uploadPhoto(bodyPhoto, 'body') : null;
+    dbPatch.body_photo_url = url;
+    window.__currentUser.bodyPhoto = url || bodyPhoto;
+    if (!url && bodyPhoto && typeof showToast === 'function') showToast('Photo saved on this device only — upload to cloud failed', 'error');
   }
-
-  // Store profile photo separately
   if (profilePhoto !== undefined) {
-    try {
-      profilePhoto
-        ? localStorage.setItem(_profilePhotoKey(session.username), profilePhoto)
-        : localStorage.removeItem(_profilePhotoKey(session.username));
-    } catch (e) {
-      console.warn('profilePhoto save failed:', e);
-      if (typeof showToast === 'function') showToast('Profile photo too large — try a smaller image', 'error');
-    }
+    const url = profilePhoto ? await window.cloudSync.uploadPhoto(profilePhoto, 'profile') : null;
+    dbPatch.profile_photo_url = url;
+    window.__currentUser.profilePhoto = url || profilePhoto;
+    if (!url && profilePhoto && typeof showToast === 'function') showToast('Photo saved on this device only — upload to cloud failed', 'error');
   }
 
-  // Save all other profile fields
-  if (Object.keys(profileUpdates).length > 0) {
-    users[session.username] = { ...users[session.username], ...profileUpdates };
-    saveUsers(users);
-  }
+  Object.assign(window.__currentUser, rest, avatarConfig !== undefined ? { avatarConfig } : {});
 
-  return getCurrentUser();
+  if (Object.keys(dbPatch).length) {
+    const { error } = await window.supabaseClient.from('profiles').update(dbPatch).eq('id', window.__currentUser.id);
+    if (error) console.warn('updateCurrentUser failed:', error);
+  }
+  return window.__currentUser;
 }
 
 // ── Auth handlers ─────────────────────────────────────────────────────────────
 
-function handleLogin() {
+async function handleLogin() {
   const username = (document.getElementById('login-username')?.value || '').trim().toLowerCase();
   const password = (document.getElementById('login-password')?.value || '');
   const errEl    = document.getElementById('login-error');
 
   if (!username || !password) { showAuthError(errEl, 'Please fill in all fields.'); return; }
 
-  const users = getUsers();
-  const user  = users[username];
-  if (!user || user.password !== btoa(password)) {
-    showAuthError(errEl, 'Invalid username or password.'); return;
-  }
+  const { error } = await window.supabaseClient.auth.signInWithPassword({
+    email: _emailForUsername(username), password,
+  });
+  if (error) { showAuthError(errEl, 'Invalid username or password.'); return; }
 
-  setSession(username);
   window.location.href = 'pages/dashboard.html';
 }
 
-function handleRegister() {
+async function handleRegister() {
   const name     = (document.getElementById('reg-name')?.value     || '').trim();
   const username = (document.getElementById('reg-username')?.value || '').trim().toLowerCase();
   const password = (document.getElementById('reg-password')?.value || '');
@@ -142,56 +104,73 @@ function handleRegister() {
   if (!gender)             { showAuthError(errEl, 'Please select your gender.');            return; }
   if (username === 'demo') { showAuthError(errEl, '"demo" is reserved. Pick another.'); return; }
 
-  const users = getUsers();
-  if (users[username]) { showAuthError(errEl, 'Username already taken.'); return; }
+  const { error } = await window.supabaseClient.auth.signUp({
+    email: _emailForUsername(username),
+    password,
+    options: {
+      data: {
+        username, name, city, gender,
+        bodyType: bodyType || 'average',
+        faceShape: faceShape || 'oval',
+        isDemo: false,
+      },
+    },
+  });
 
-  users[username] = {
-    name, username, password: btoa(password),
-    city, gender,
-    bodyType:  bodyType  || 'average',
-    faceShape: faceShape || 'oval',
-    createdAt: Date.now()
-  };
+  if (error) {
+    const msg = /registered|exists/i.test(error.message) ? 'Username already taken.' : error.message;
+    showAuthError(errEl, msg);
+    return;
+  }
 
-  saveUsers(users);
-  setSession(username);
   window.location.href = 'pages/dashboard.html';
 }
 
-function loginAsDemo() {
-  seedDemoAccount();
-  setSession('demo');
+async function loginAsDemo() {
+  const email = _emailForUsername('demo');
+  let { error } = await window.supabaseClient.auth.signInWithPassword({ email, password: 'demo123' });
+
+  if (error) {
+    // First time — seed the demo account, then log in.
+    const signUp = await window.supabaseClient.auth.signUp({
+      email, password: 'demo123',
+      options: {
+        data: {
+          username: 'demo', name: 'Demo User', city: 'Mumbai',
+          gender: 'male', bodyType: 'athletic', faceShape: 'oval', isDemo: true,
+        },
+      },
+    });
+    if (signUp.error) { alert('Demo account is unavailable right now. Please try again shortly.'); return; }
+  }
+
   window.location.href = 'pages/dashboard.html';
 }
 
-function logout() {
-  clearSession();
+async function logout() {
+  await window.supabaseClient.auth.signOut();
+  window.__currentUser = null;
   const inPages = window.location.pathname.includes('/pages/');
   window.location.href = inPages ? '../index.html' : 'index.html';
 }
 
-function deleteAccount() {
-  const user = getCurrentUser();
-  if (user?.isDemo) { if (typeof showToast === 'function') showToast('Cannot delete demo account', 'error'); return; }
+async function deleteAccount() {
+  const user = window.__currentUser;
+  if (!user) return;
+  if (user.isDemo) { if (typeof showToast === 'function') showToast('Cannot delete demo account', 'error'); return; }
   if (!confirm('Delete your account and all data? This cannot be undone.')) return;
-  const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-  if (session) {
-    const u = session.username;
-    const users = getUsers();
-    delete users[u];
-    saveUsers(users);
-    ['styleai_wardrobe_', 'styleai_saved_outfits_', 'styleai_calendar_'].forEach(k => localStorage.removeItem(k + u));
-    localStorage.removeItem(_bodyPhotoKey(u));
-    localStorage.removeItem(_profilePhotoKey(u));
-  }
-  clearSession();
-  window.location.href = '../index.html';
-}
 
-function requireAuth() {
-  const user = getCurrentUser();
-  if (!user) { window.location.href = '../index.html'; return null; }
-  return user;
+  await window.supabaseClient.from('wardrobe').delete().eq('user_id', user.id);
+  await window.supabaseClient.from('saved_outfits').delete().eq('user_id', user.id);
+  await window.supabaseClient.from('calendar_entries').delete().eq('user_id', user.id);
+  await window.supabaseClient.from('profiles').delete().eq('id', user.id);
+  await window.supabaseClient.auth.signOut();
+  // Note: this removes the user's profile & data. Fully deleting the underlying
+  // auth.users record needs the service-role key, used from a server or a
+  // Supabase Edge Function — never from client-side code. See SETUP.md.
+
+  window.__currentUser = null;
+  window.location.href = '../index.html';
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -206,5 +185,3 @@ function showAuthError(el, msg) {
 function getActivePillVal(groupId) {
   return document.querySelector('#' + groupId + ' .pill.active')?.dataset.val || null;
 }
-
-seedDemoAccount();
