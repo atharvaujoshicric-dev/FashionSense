@@ -78,7 +78,7 @@
   height: 36px;
   border-radius: 50%;
   border: 2px solid var(--accent);
-  background: rgba(10,10,15,0.8);
+  background: rgba(27,22,32,0.8);
   backdrop-filter: blur(4px);
   overflow: hidden;
   display: flex;

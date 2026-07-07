@@ -39,6 +39,7 @@
   --nav-height: 68px;
   --topbar-height: 56px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 *, *::before, *::after {
@@ -248,7 +249,7 @@ select option {
   justify-content: space-between;
   padding: 0 1rem;
   height: var(--topbar-height);
-  background: rgba(10,10,15,0.95);
+  background: rgba(27,22,32,0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -310,7 +311,7 @@ select option {
   justify-content: space-around;
   height: calc(var(--nav-height) + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
-  background: rgba(13,13,20,0.97);
+  background: rgba(27,22,32,0.97);
   backdrop-filter: blur(16px);
   border-top: 1px solid var(--border);
 }
@@ -707,10 +708,10 @@ select option {
 }
 
 [data-theme="light"] .topbar {
-  background: rgba(245,243,239,0.95);
+  background: rgba(245,237,233,0.95);
 }
 [data-theme="light"] .bottom-nav {
-  background: rgba(240,237,232,0.97);
+  background: rgba(239,225,219,0.97);
 }
 [data-theme="light"] .splash-bg {
   background:
@@ -873,4 +874,45 @@ body { -webkit-overflow-scrolling: touch; }
 /* ── Topbar avatar (profile photo ring) ── */
 .topbar-avatar {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* ==========================================
+   PHONE-FRAME LAYOUT (wide screens / desktop)
+   ------------------------------------------
+   StyleAI is designed as a mobile app. On an actual phone the rules
+   above already do the job. On anything wider (a laptop browser,
+   testing on desktop) this keeps the whole app pinned to a fixed
+   mobile-width column instead of stretching edge-to-edge — the fixed
+   full-width elements (splash background, topbar, bottom nav, loader
+   overlay) are re-centered to line up with it.
+   ========================================== */
+
+@media (min-width: 541px) {
+  body {
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    box-shadow: 0 0 60px rgba(0,0,0,0.45);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  .splash-bg,
+  .topbar,
+  .bottom-nav,
+  #cloud-sync-loader {
+    left: 50% !important;
+    right: auto !important;
+    width: 480px;
+    max-width: 100vw;
+    transform: translateX(-50%);
+  }
+}
+
+/* Respect the notch/status bar area at the top too, not just the bottom */
+.topbar { padding-top: var(--safe-top); height: calc(var(--topbar-height) + var(--safe-top)); }
+
+/* Comfortable tap targets on touch devices */
+@media (pointer: coarse) {
+  button, .nav-item, .pill, a { min-height: 40px; }
 }

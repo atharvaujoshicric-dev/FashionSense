@@ -88,7 +88,7 @@ async function handleLogin() {
   if (!_supabaseReady(errEl)) return;
 
   try {
-    const { error } = await window.supabaseClient.auth.signInWithPassword({
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
       email: _emailForUsername(username), password,
     });
     if (error) {
@@ -98,6 +98,11 @@ async function handleLogin() {
           ? 'Could not reach the server. Check your internet connection and try again.'
           : 'Invalid username or password.';
       showAuthError(errEl, msg);
+      return;
+    }
+    if (!data.session) {
+      showAuthError(errEl, 'Signed in, but no session came back — please try again.');
+      console.warn('signInWithPassword: no error but also no session', data);
       return;
     }
     window.location.href = 'pages/dashboard.html';

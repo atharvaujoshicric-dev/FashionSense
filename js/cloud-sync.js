@@ -68,6 +68,13 @@ async function hydrate() {
   let session;
   try {
     ({ data: { session } } = await window.supabaseClient.auth.getSession());
+    if (!session && IS_PROTECTED) {
+      // Rare race right after a fresh login/signup — give the SDK one more
+      // beat to read the session it just persisted, instead of silently
+      // bouncing back to the login screen.
+      await new Promise((r) => setTimeout(r, 500));
+      ({ data: { session } } = await window.supabaseClient.auth.getSession());
+    }
   } catch (e) {
     showFatalError('Could not reach Supabase', 'Check your internet connection and that the URL in js/supabase-client.js is correct.');
     console.error(e);
@@ -75,7 +82,14 @@ async function hydrate() {
   }
 
   if (!session) {
-    if (IS_PROTECTED) { window.location.href = '../index.html'; return; }
+    if (IS_PROTECTED) {
+      showFatalError(
+        'You\u2019re not signed in',
+        'No active session was found, so you were sent back to login. If you just registered or logged in and keep landing back here, open the browser console (F12) for details, and double-check "Confirm email" is OFF in Supabase → Authentication → Providers → Email.'
+      );
+      setTimeout(() => { window.location.href = '../index.html'; }, 2600);
+      return;
+    }
     removeLoader();
     return;
   }
